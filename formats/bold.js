@@ -19,4 +19,6 @@ class Bold extends Inline {
 Bold.blotName = 'bold';
 Bold.tagName = ['STRONG', 'B'];
 
+Bold.defaultChild = 'break';
+
 export default Bold;
