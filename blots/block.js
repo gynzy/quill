@@ -58,7 +58,14 @@ class Block extends Parchment.Block {
         } else {
           return delta.insert(leaf.value(), bubbleFormats(leaf));
         }
-      }, new Delta()).insert('\n', bubbleFormats(this));
+      }, new Delta());
+      var des = this.descendants(Parchment.Leaf);
+      if (des.length === 1 && (des[0].domNode.nodeName === 'BR' || des[0].statics.blotName === 'cursor')) {
+        // special case for retrieving format of an empty line
+        this.cache.delta = this.cache.delta.insert('\n', bubbleFormats(des[0]));
+      } else {
+        this.cache.delta = this.cache.delta.insert('\n', bubbleFormats(this));
+      }
     }
     return this.cache.delta;
   }
@@ -75,7 +82,7 @@ class Block extends Parchment.Block {
         this.format(name, value);
       }
     } else {
-      super.formatAt(index, Math.min(length, this.length() - index - 1), name, value);
+      super.formatAt(index, Math.min(length, this.length() - index), name, value);
     }
     this.cache = {};
   }
@@ -105,7 +112,14 @@ class Block extends Parchment.Block {
     let head = this.children.head;
     super.insertBefore(blot, ref);
     if (head instanceof Break) {
-      head.remove();
+      // break blot is removed temperarily from the tree, shouldn't call .remove() because it will detach it permanently (defined in shadowBlot)
+      // head.remove();
+      if (head.domNode.parentNode != null) {
+        head.domNode.parentNode.removeChild(head.domNode);
+      }
+      if (head.parent != null) {
+        head.parent.removeChild(head);
+      }
     }
     this.cache = {};
   }
@@ -139,7 +153,10 @@ class Block extends Parchment.Block {
   split(index, force = false) {
     if (force && (index === 0 || index >= this.length() - NEWLINE_LENGTH)) {
       let clone = this.clone();
-      if (index === 0) {
+      // add de defaultChild so it can be formatted correctly
+      clone.optimize();
+      if (index === 0 && this.length() > 1) {
+        // newline should be inserted before current line if cursor is at start of line && line is not empty
         this.parent.insertBefore(clone, this);
         return this;
       } else {
