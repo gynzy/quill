@@ -192,12 +192,9 @@ Keyboard.DEFAULTS = {
     },
     'tab': {
       key: Keyboard.keys.TAB,
-      handler: function(range) {
+      handler: function(range, context) {
         this.quill.history.cutoff();
-        let delta = new Delta().retain(range.index)
-                               .delete(range.length)
-                               .insert('\t');
-        this.quill.updateContents(delta, Quill.sources.USER);
+        this.quill.insertText(range.index, '\t', context.format, Quill.sources.USER);
         this.quill.history.cutoff();
         this.quill.setSelection(range.index + 1, Quill.sources.SILENT);
       }
