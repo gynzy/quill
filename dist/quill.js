@@ -879,6 +879,7 @@ var Block = function (_Parchment$Block) {
         }, new _quillDelta2.default());
         var des = this.descendants(_parchment2.default.Leaf);
         if (des.length === 1 && (des[0].domNode.nodeName === 'BR' || des[0].statics.blotName === 'cursor')) {
+          // special case for retrieving format of an empty line
           this.cache.delta = this.cache.delta.insert('\n', bubbleFormats(des[0]));
         } else {
           this.cache.delta = this.cache.delta.insert('\n', bubbleFormats(this));
@@ -1847,6 +1848,8 @@ Inline.allowedChildren = [Inline, _parchment2.default.Embed, _text2.default];
 Inline.order = ['cursor', 'inline', // Must be lower
 'underline', 'strike', 'italic', 'bold', 'script', 'link', 'code' // Must be higher
 ];
+// in order to preserve inlined format blots a default child blot needs to inserted if the blot becomes empty
+Inline.defaultChild = 'break';
 
 exports.default = Inline;
 
@@ -2551,14 +2554,9 @@ var Editor = function () {
           }
           scrollLength += length;
         }
-        // console.log(Break.prototype.length);
-        // Break.prototype.length = () => 1;
         Object.keys(attributes).forEach(function (name) {
           _this.scroll.formatAt(index, length, name, attributes[name]);
         });
-        // console.log(Break.prototype.length);
-        // Break.prototype.length = () => 0;
-        // console.log(Break.prototype.length);
         return index + length;
       }, 0);
       delta.reduce(function (index, op) {
