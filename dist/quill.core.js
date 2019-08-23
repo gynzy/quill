@@ -4314,7 +4314,11 @@ var Scroll = function (_Parchment$Scroll) {
     value: function enable() {
       var enabled = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
 
-      this.domNode.setAttribute('contenteditable', enabled);
+      if (enabled) {
+        this.domNode.setAttribute('contenteditable', enabled);
+      } else {
+        this.domNode.removeAttribute('contenteditable');
+      }
     }
   }, {
     key: 'formatAt',

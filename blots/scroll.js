@@ -68,7 +68,11 @@ class Scroll extends Parchment.Scroll {
   }
 
   enable(enabled = true) {
-    this.domNode.setAttribute('contenteditable', enabled);
+    if (enabled) {
+      this.domNode.setAttribute('contenteditable', enabled);
+    } else {
+      this.domNode.removeAttribute('contenteditable');
+    }
   }
 
   formatAt(index, length, format, value) {
