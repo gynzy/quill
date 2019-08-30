@@ -13,12 +13,12 @@ import { ColorClass, ColorStyle } from './formats/color';
 import { FontClass, FontStyle } from './formats/font';
 import { SizeClass, SizeStyle } from './formats/size';
 
-import Bold from './formats/bold';
-import Italic from './formats/italic';
+import Bold, { BoldStyle } from './formats/bold';
+import Italic, { ItalicStyle } from './formats/italic';
 import Link from './formats/link';
 import Script from './formats/script';
 import Strike from './formats/strike';
-import Underline from './formats/underline';
+import Underline, { UnderlineStrikeStyle } from './formats/underline';
 
 import Image from './formats/image';
 import Video from './formats/video';
@@ -74,12 +74,15 @@ Quill.register({
   'formats/list': List,
 
   'formats/bold': Bold,
+  'formats/boldStyle': BoldStyle,
   'formats/code': InlineCode,
   'formats/italic': Italic,
+  'formats/italicStyle': ItalicStyle,
   'formats/link': Link,
   'formats/script': Script,
   'formats/strike': Strike,
   'formats/underline': Underline,
+  'formats/underlineStrikeStyle': UnderlineStrikeStyle,
 
   'formats/image': Image,
   'formats/video': Video,

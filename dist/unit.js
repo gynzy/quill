@@ -76,7 +76,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 110);
+/******/ 	return __webpack_require__(__webpack_require__.s = 114);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -5341,8 +5341,329 @@ exports.ColorClass = ColorClass;
 exports.ColorStyle = ColorStyle;
 
 /***/ }),
-/* 27 */,
-/* 28 */,
+/* 27 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.sanitize = exports.default = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _inline = __webpack_require__(6);
+
+var _inline2 = _interopRequireDefault(_inline);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Link = function (_Inline) {
+  _inherits(Link, _Inline);
+
+  function Link() {
+    _classCallCheck(this, Link);
+
+    return _possibleConstructorReturn(this, (Link.__proto__ || Object.getPrototypeOf(Link)).apply(this, arguments));
+  }
+
+  _createClass(Link, [{
+    key: 'format',
+    value: function format(name, value) {
+      if (name !== this.statics.blotName || !value) return _get(Link.prototype.__proto__ || Object.getPrototypeOf(Link.prototype), 'format', this).call(this, name, value);
+      value = this.constructor.sanitize(value);
+      this.domNode.setAttribute('href', value);
+    }
+  }], [{
+    key: 'create',
+    value: function create(value) {
+      var node = _get(Link.__proto__ || Object.getPrototypeOf(Link), 'create', this).call(this, value);
+      value = this.sanitize(value);
+      node.setAttribute('href', value);
+      node.setAttribute('target', '_blank');
+      return node;
+    }
+  }, {
+    key: 'formats',
+    value: function formats(domNode) {
+      return domNode.getAttribute('href');
+    }
+  }, {
+    key: 'sanitize',
+    value: function sanitize(url) {
+      return _sanitize(url, this.PROTOCOL_WHITELIST) ? url : this.SANITIZED_URL;
+    }
+  }]);
+
+  return Link;
+}(_inline2.default);
+
+Link.blotName = 'link';
+Link.tagName = 'A';
+Link.SANITIZED_URL = 'about:blank';
+Link.PROTOCOL_WHITELIST = ['http', 'https', 'mailto', 'tel'];
+
+function _sanitize(url, protocols) {
+  var anchor = document.createElement('a');
+  anchor.href = url;
+  var protocol = anchor.href.slice(0, anchor.href.indexOf(':'));
+  return protocols.indexOf(protocol) > -1;
+}
+
+exports.default = Link;
+exports.sanitize = _sanitize;
+
+/***/ }),
+/* 28 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _keyboard = __webpack_require__(23);
+
+var _keyboard2 = _interopRequireDefault(_keyboard);
+
+var _dropdown = __webpack_require__(107);
+
+var _dropdown2 = _interopRequireDefault(_dropdown);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var optionsCounter = 0;
+
+function toggleAriaAttribute(element, attribute) {
+  element.setAttribute(attribute, !(element.getAttribute(attribute) === 'true'));
+}
+
+var Picker = function () {
+  function Picker(select) {
+    var _this = this;
+
+    _classCallCheck(this, Picker);
+
+    this.select = select;
+    this.container = document.createElement('span');
+    this.buildPicker();
+    this.select.style.display = 'none';
+    this.select.parentNode.insertBefore(this.container, this.select);
+
+    this.label.addEventListener('mousedown', function () {
+      _this.togglePicker();
+    });
+    this.label.addEventListener('keydown', function (event) {
+      switch (event.keyCode) {
+        // Allows the "Enter" key to open the picker
+        case _keyboard2.default.keys.ENTER:
+          _this.togglePicker();
+          break;
+
+        // Allows the "Escape" key to close the picker
+        case _keyboard2.default.keys.ESCAPE:
+          _this.escape();
+          event.preventDefault();
+          break;
+        default:
+      }
+    });
+    this.select.addEventListener('change', this.update.bind(this));
+  }
+
+  _createClass(Picker, [{
+    key: 'togglePicker',
+    value: function togglePicker() {
+      this.container.classList.toggle('ql-expanded');
+      // Toggle aria-expanded and aria-hidden to make the picker accessible
+      toggleAriaAttribute(this.label, 'aria-expanded');
+      toggleAriaAttribute(this.options, 'aria-hidden');
+    }
+  }, {
+    key: 'buildItem',
+    value: function buildItem(option) {
+      var _this2 = this;
+
+      var item = document.createElement('span');
+      item.tabIndex = '0';
+      item.setAttribute('role', 'button');
+
+      item.classList.add('ql-picker-item');
+      if (option.hasAttribute('value')) {
+        item.setAttribute('data-value', option.getAttribute('value'));
+      }
+      if (option.textContent) {
+        item.setAttribute('data-label', option.textContent);
+      }
+      item.addEventListener('click', function () {
+        _this2.selectItem(item, true);
+      });
+      item.addEventListener('keydown', function (event) {
+        switch (event.keyCode) {
+          // Allows the "Enter" key to select an item
+          case _keyboard2.default.keys.ENTER:
+            _this2.selectItem(item, true);
+            event.preventDefault();
+            break;
+
+          // Allows the "Escape" key to close the picker
+          case _keyboard2.default.keys.ESCAPE:
+            _this2.escape();
+            event.preventDefault();
+            break;
+          default:
+        }
+      });
+
+      return item;
+    }
+  }, {
+    key: 'buildLabel',
+    value: function buildLabel() {
+      var label = document.createElement('span');
+      label.classList.add('ql-picker-label');
+      label.innerHTML = _dropdown2.default;
+      label.tabIndex = '0';
+      label.setAttribute('role', 'button');
+      label.setAttribute('aria-expanded', 'false');
+      this.container.appendChild(label);
+      return label;
+    }
+  }, {
+    key: 'buildOptions',
+    value: function buildOptions() {
+      var _this3 = this;
+
+      var options = document.createElement('span');
+      options.classList.add('ql-picker-options');
+
+      // Don't want screen readers to read this until options are visible
+      options.setAttribute('aria-hidden', 'true');
+      options.tabIndex = '-1';
+
+      // Need a unique id for aria-controls
+      options.id = 'ql-picker-options-' + optionsCounter;
+      optionsCounter += 1;
+      this.label.setAttribute('aria-controls', options.id);
+
+      this.options = options;
+
+      [].slice.call(this.select.options).forEach(function (option) {
+        var item = _this3.buildItem(option);
+        options.appendChild(item);
+        if (option.selected === true) {
+          _this3.selectItem(item);
+        }
+      });
+      this.container.appendChild(options);
+    }
+  }, {
+    key: 'buildPicker',
+    value: function buildPicker() {
+      var _this4 = this;
+
+      [].slice.call(this.select.attributes).forEach(function (item) {
+        _this4.container.setAttribute(item.name, item.value);
+      });
+      this.container.classList.add('ql-picker');
+      this.label = this.buildLabel();
+      this.buildOptions();
+    }
+  }, {
+    key: 'escape',
+    value: function escape() {
+      var _this5 = this;
+
+      // Close menu and return focus to trigger label
+      this.close();
+      // Need setTimeout for accessibility to ensure that the browser executes
+      // focus on the next process thread and after any DOM content changes
+      setTimeout(function () {
+        return _this5.label.focus();
+      }, 1);
+    }
+  }, {
+    key: 'close',
+    value: function close() {
+      this.container.classList.remove('ql-expanded');
+      this.label.setAttribute('aria-expanded', 'false');
+      this.options.setAttribute('aria-hidden', 'true');
+    }
+  }, {
+    key: 'selectItem',
+    value: function selectItem(item) {
+      var trigger = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      var selected = this.container.querySelector('.ql-selected');
+      if (item === selected) return;
+      if (selected != null) {
+        selected.classList.remove('ql-selected');
+      }
+      if (item == null) return;
+      item.classList.add('ql-selected');
+      this.select.selectedIndex = [].indexOf.call(item.parentNode.children, item);
+      if (item.hasAttribute('data-value')) {
+        this.label.setAttribute('data-value', item.getAttribute('data-value'));
+      } else {
+        this.label.removeAttribute('data-value');
+      }
+      if (item.hasAttribute('data-label')) {
+        this.label.setAttribute('data-label', item.getAttribute('data-label'));
+      } else {
+        this.label.removeAttribute('data-label');
+      }
+      if (trigger) {
+        if (typeof Event === 'function') {
+          this.select.dispatchEvent(new Event('change'));
+        } else if ((typeof Event === 'undefined' ? 'undefined' : _typeof(Event)) === 'object') {
+          // IE11
+          var event = document.createEvent('Event');
+          event.initEvent('change', true, true);
+          this.select.dispatchEvent(event);
+        }
+        this.close();
+      }
+    }
+  }, {
+    key: 'update',
+    value: function update() {
+      var option = void 0;
+      if (this.select.selectedIndex > -1) {
+        var item = this.container.querySelector('.ql-picker-options').children[this.select.selectedIndex];
+        option = this.select.options[this.select.selectedIndex];
+        this.selectItem(item);
+      } else {
+        this.selectItem(null);
+      }
+      var isActive = option != null && option !== this.select.querySelector('option[selected]');
+      this.label.classList.toggle('ql-active', isActive);
+    }
+  }]);
+
+  return Picker;
+}();
+
+exports.default = Picker;
+
+/***/ }),
 /* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -6179,7 +6500,63 @@ exports.SizeClass = SizeClass;
 exports.SizeStyle = SizeStyle;
 
 /***/ }),
-/* 41 */,
+/* 41 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  'align': {
+    '': __webpack_require__(76),
+    'center': __webpack_require__(77),
+    'right': __webpack_require__(78),
+    'justify': __webpack_require__(79)
+  },
+  'background': __webpack_require__(80),
+  'blockquote': __webpack_require__(81),
+  'bold': __webpack_require__(82),
+  'clean': __webpack_require__(83),
+  'code': __webpack_require__(58),
+  'code-block': __webpack_require__(58),
+  'color': __webpack_require__(84),
+  'direction': {
+    '': __webpack_require__(85),
+    'rtl': __webpack_require__(86)
+  },
+  'float': {
+    'center': __webpack_require__(87),
+    'full': __webpack_require__(88),
+    'left': __webpack_require__(89),
+    'right': __webpack_require__(90)
+  },
+  'formula': __webpack_require__(91),
+  'header': {
+    '1': __webpack_require__(92),
+    '2': __webpack_require__(93)
+  },
+  'italic': __webpack_require__(94),
+  'image': __webpack_require__(95),
+  'indent': {
+    '+1': __webpack_require__(96),
+    '-1': __webpack_require__(97)
+  },
+  'link': __webpack_require__(98),
+  'list': {
+    'ordered': __webpack_require__(99),
+    'bullet': __webpack_require__(100),
+    'check': __webpack_require__(101)
+  },
+  'script': {
+    'sub': __webpack_require__(102),
+    'super': __webpack_require__(103)
+  },
+  'strike': __webpack_require__(104),
+  'underline': __webpack_require__(105),
+  'video': __webpack_require__(106)
+};
+
+/***/ }),
 /* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -6348,7 +6725,349 @@ exports.default = History;
 exports.getLastChangeIndex = getLastChangeIndex;
 
 /***/ }),
-/* 43 */,
+/* 43 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = exports.BaseTooltip = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _extend = __webpack_require__(3);
+
+var _extend2 = _interopRequireDefault(_extend);
+
+var _quillDelta = __webpack_require__(2);
+
+var _quillDelta2 = _interopRequireDefault(_quillDelta);
+
+var _emitter = __webpack_require__(8);
+
+var _emitter2 = _interopRequireDefault(_emitter);
+
+var _keyboard = __webpack_require__(23);
+
+var _keyboard2 = _interopRequireDefault(_keyboard);
+
+var _theme = __webpack_require__(34);
+
+var _theme2 = _interopRequireDefault(_theme);
+
+var _colorPicker = __webpack_require__(59);
+
+var _colorPicker2 = _interopRequireDefault(_colorPicker);
+
+var _iconPicker = __webpack_require__(60);
+
+var _iconPicker2 = _interopRequireDefault(_iconPicker);
+
+var _picker = __webpack_require__(28);
+
+var _picker2 = _interopRequireDefault(_picker);
+
+var _tooltip = __webpack_require__(61);
+
+var _tooltip2 = _interopRequireDefault(_tooltip);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ALIGNS = [false, 'center', 'right', 'justify'];
+
+var COLORS = ["#000000", "#e60000", "#ff9900", "#ffff00", "#008a00", "#0066cc", "#9933ff", "#ffffff", "#facccc", "#ffebcc", "#ffffcc", "#cce8cc", "#cce0f5", "#ebd6ff", "#bbbbbb", "#f06666", "#ffc266", "#ffff66", "#66b966", "#66a3e0", "#c285ff", "#888888", "#a10000", "#b26b00", "#b2b200", "#006100", "#0047b2", "#6b24b2", "#444444", "#5c0000", "#663d00", "#666600", "#003700", "#002966", "#3d1466"];
+
+var FONTS = [false, 'serif', 'monospace'];
+
+var HEADERS = ['1', '2', '3', false];
+
+var SIZES = ['small', false, 'large', 'huge'];
+
+var BaseTheme = function (_Theme) {
+  _inherits(BaseTheme, _Theme);
+
+  function BaseTheme(quill, options) {
+    _classCallCheck(this, BaseTheme);
+
+    var _this = _possibleConstructorReturn(this, (BaseTheme.__proto__ || Object.getPrototypeOf(BaseTheme)).call(this, quill, options));
+
+    var listener = function listener(e) {
+      if (!document.body.contains(quill.root)) {
+        return document.body.removeEventListener('click', listener);
+      }
+      if (_this.tooltip != null && !_this.tooltip.root.contains(e.target) && document.activeElement !== _this.tooltip.textbox && !_this.quill.hasFocus()) {
+        _this.tooltip.hide();
+      }
+      if (_this.pickers != null) {
+        _this.pickers.forEach(function (picker) {
+          if (!picker.container.contains(e.target)) {
+            picker.close();
+          }
+        });
+      }
+    };
+    quill.emitter.listenDOM('click', document.body, listener);
+    return _this;
+  }
+
+  _createClass(BaseTheme, [{
+    key: 'addModule',
+    value: function addModule(name) {
+      var module = _get(BaseTheme.prototype.__proto__ || Object.getPrototypeOf(BaseTheme.prototype), 'addModule', this).call(this, name);
+      if (name === 'toolbar') {
+        this.extendToolbar(module);
+      }
+      return module;
+    }
+  }, {
+    key: 'buildButtons',
+    value: function buildButtons(buttons, icons) {
+      buttons.forEach(function (button) {
+        var className = button.getAttribute('class') || '';
+        className.split(/\s+/).forEach(function (name) {
+          if (!name.startsWith('ql-')) return;
+          name = name.slice('ql-'.length);
+          if (icons[name] == null) return;
+          if (name === 'direction') {
+            button.innerHTML = icons[name][''] + icons[name]['rtl'];
+          } else if (typeof icons[name] === 'string') {
+            button.innerHTML = icons[name];
+          } else {
+            var value = button.value || '';
+            if (value != null && icons[name][value]) {
+              button.innerHTML = icons[name][value];
+            }
+          }
+        });
+      });
+    }
+  }, {
+    key: 'buildPickers',
+    value: function buildPickers(selects, icons) {
+      var _this2 = this;
+
+      this.pickers = selects.map(function (select) {
+        if (select.classList.contains('ql-align')) {
+          if (select.querySelector('option') == null) {
+            fillSelect(select, ALIGNS);
+          }
+          return new _iconPicker2.default(select, icons.align);
+        } else if (select.classList.contains('ql-background') || select.classList.contains('ql-color')) {
+          var format = select.classList.contains('ql-background') ? 'background' : 'color';
+          if (select.querySelector('option') == null) {
+            fillSelect(select, COLORS, format === 'background' ? '#ffffff' : '#000000');
+          }
+          return new _colorPicker2.default(select, icons[format]);
+        } else {
+          if (select.querySelector('option') == null) {
+            if (select.classList.contains('ql-font')) {
+              fillSelect(select, FONTS);
+            } else if (select.classList.contains('ql-header')) {
+              fillSelect(select, HEADERS);
+            } else if (select.classList.contains('ql-size')) {
+              fillSelect(select, SIZES);
+            }
+          }
+          return new _picker2.default(select);
+        }
+      });
+      var update = function update() {
+        _this2.pickers.forEach(function (picker) {
+          picker.update();
+        });
+      };
+      this.quill.on(_emitter2.default.events.EDITOR_CHANGE, update);
+    }
+  }]);
+
+  return BaseTheme;
+}(_theme2.default);
+
+BaseTheme.DEFAULTS = (0, _extend2.default)(true, {}, _theme2.default.DEFAULTS, {
+  modules: {
+    toolbar: {
+      handlers: {
+        formula: function formula() {
+          this.quill.theme.tooltip.edit('formula');
+        },
+        image: function image() {
+          var _this3 = this;
+
+          var fileInput = this.container.querySelector('input.ql-image[type=file]');
+          if (fileInput == null) {
+            fileInput = document.createElement('input');
+            fileInput.setAttribute('type', 'file');
+            fileInput.setAttribute('accept', 'image/png, image/gif, image/jpeg, image/bmp, image/x-icon');
+            fileInput.classList.add('ql-image');
+            fileInput.addEventListener('change', function () {
+              if (fileInput.files != null && fileInput.files[0] != null) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                  var range = _this3.quill.getSelection(true);
+                  _this3.quill.updateContents(new _quillDelta2.default().retain(range.index).delete(range.length).insert({ image: e.target.result }), _emitter2.default.sources.USER);
+                  _this3.quill.setSelection(range.index + 1, _emitter2.default.sources.SILENT);
+                  fileInput.value = "";
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+              }
+            });
+            this.container.appendChild(fileInput);
+          }
+          fileInput.click();
+        },
+        video: function video() {
+          this.quill.theme.tooltip.edit('video');
+        }
+      }
+    }
+  }
+});
+
+var BaseTooltip = function (_Tooltip) {
+  _inherits(BaseTooltip, _Tooltip);
+
+  function BaseTooltip(quill, boundsContainer) {
+    _classCallCheck(this, BaseTooltip);
+
+    var _this4 = _possibleConstructorReturn(this, (BaseTooltip.__proto__ || Object.getPrototypeOf(BaseTooltip)).call(this, quill, boundsContainer));
+
+    _this4.textbox = _this4.root.querySelector('input[type="text"]');
+    _this4.listen();
+    return _this4;
+  }
+
+  _createClass(BaseTooltip, [{
+    key: 'listen',
+    value: function listen() {
+      var _this5 = this;
+
+      this.textbox.addEventListener('keydown', function (event) {
+        if (_keyboard2.default.match(event, 'enter')) {
+          _this5.save();
+          event.preventDefault();
+        } else if (_keyboard2.default.match(event, 'escape')) {
+          _this5.cancel();
+          event.preventDefault();
+        }
+      });
+    }
+  }, {
+    key: 'cancel',
+    value: function cancel() {
+      this.hide();
+    }
+  }, {
+    key: 'edit',
+    value: function edit() {
+      var mode = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'link';
+      var preview = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
+      this.root.classList.remove('ql-hidden');
+      this.root.classList.add('ql-editing');
+      if (preview != null) {
+        this.textbox.value = preview;
+      } else if (mode !== this.root.getAttribute('data-mode')) {
+        this.textbox.value = '';
+      }
+      this.position(this.quill.getBounds(this.quill.selection.savedRange));
+      this.textbox.select();
+      this.textbox.setAttribute('placeholder', this.textbox.getAttribute('data-' + mode) || '');
+      this.root.setAttribute('data-mode', mode);
+    }
+  }, {
+    key: 'restoreFocus',
+    value: function restoreFocus() {
+      var scrollTop = this.quill.scrollingContainer.scrollTop;
+      this.quill.focus();
+      this.quill.scrollingContainer.scrollTop = scrollTop;
+    }
+  }, {
+    key: 'save',
+    value: function save() {
+      var value = this.textbox.value;
+      switch (this.root.getAttribute('data-mode')) {
+        case 'link':
+          {
+            var scrollTop = this.quill.root.scrollTop;
+            if (this.linkRange) {
+              this.quill.formatText(this.linkRange, 'link', value, _emitter2.default.sources.USER);
+              delete this.linkRange;
+            } else {
+              this.restoreFocus();
+              this.quill.format('link', value, _emitter2.default.sources.USER);
+            }
+            this.quill.root.scrollTop = scrollTop;
+            break;
+          }
+        case 'video':
+          {
+            value = extractVideoUrl(value);
+          } // eslint-disable-next-line no-fallthrough
+        case 'formula':
+          {
+            if (!value) break;
+            var range = this.quill.getSelection(true);
+            if (range != null) {
+              var index = range.index + range.length;
+              this.quill.insertEmbed(index, this.root.getAttribute('data-mode'), value, _emitter2.default.sources.USER);
+              if (this.root.getAttribute('data-mode') === 'formula') {
+                this.quill.insertText(index + 1, ' ', _emitter2.default.sources.USER);
+              }
+              this.quill.setSelection(index + 2, _emitter2.default.sources.USER);
+            }
+            break;
+          }
+        default:
+      }
+      this.textbox.value = '';
+      this.hide();
+    }
+  }]);
+
+  return BaseTooltip;
+}(_tooltip2.default);
+
+function extractVideoUrl(url) {
+  var match = url.match(/^(?:(https?):\/\/)?(?:(?:www|m)\.)?youtube\.com\/watch.*v=([a-zA-Z0-9_-]+)/) || url.match(/^(?:(https?):\/\/)?(?:(?:www|m)\.)?youtu\.be\/([a-zA-Z0-9_-]+)/);
+  if (match) {
+    return (match[1] || 'https') + '://www.youtube.com/embed/' + match[2] + '?showinfo=0';
+  }
+  if (match = url.match(/^(?:(https?):\/\/)?(?:www\.)?vimeo\.com\/(\d+)/)) {
+    // eslint-disable-line no-cond-assign
+    return (match[1] || 'https') + '://player.vimeo.com/video/' + match[2] + '/';
+  }
+  return url;
+}
+
+function fillSelect(select, values) {
+  var defaultValue = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+  values.forEach(function (value) {
+    var option = document.createElement('option');
+    if (value === defaultValue) {
+      option.setAttribute('selected', 'selected');
+    } else {
+      option.setAttribute('value', value);
+    }
+    select.appendChild(option);
+  });
+}
+
+exports.BaseTooltip = BaseTooltip;
+exports.default = BaseTheme;
+
+/***/ }),
 /* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -8595,65 +9314,5992 @@ exports.matchSpacing = matchSpacing;
 exports.matchText = matchText;
 
 /***/ }),
-/* 56 */,
-/* 57 */,
-/* 58 */,
-/* 59 */,
-/* 60 */,
-/* 61 */,
-/* 62 */,
-/* 63 */,
-/* 64 */,
-/* 65 */,
-/* 66 */,
-/* 67 */,
-/* 68 */,
-/* 69 */,
-/* 70 */,
-/* 71 */,
-/* 72 */,
-/* 73 */,
-/* 74 */,
-/* 75 */,
-/* 76 */,
-/* 77 */,
-/* 78 */,
-/* 79 */,
-/* 80 */,
-/* 81 */,
-/* 82 */,
-/* 83 */,
-/* 84 */,
-/* 85 */,
-/* 86 */,
-/* 87 */,
-/* 88 */,
-/* 89 */,
-/* 90 */,
-/* 91 */,
-/* 92 */,
-/* 93 */,
-/* 94 */,
-/* 95 */,
-/* 96 */,
-/* 97 */,
-/* 98 */,
-/* 99 */,
-/* 100 */,
-/* 101 */,
-/* 102 */,
-/* 103 */,
-/* 104 */,
-/* 105 */,
-/* 106 */,
-/* 107 */,
-/* 108 */,
-/* 109 */,
-/* 110 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(29);
+"use strict";
 
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.BoldStyle = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _inline = __webpack_require__(6);
+
+var _inline2 = _interopRequireDefault(_inline);
+
+var _parchment = __webpack_require__(0);
+
+var _parchment2 = _interopRequireDefault(_parchment);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Bold = function (_Inline) {
+  _inherits(Bold, _Inline);
+
+  function Bold() {
+    _classCallCheck(this, Bold);
+
+    return _possibleConstructorReturn(this, (Bold.__proto__ || Object.getPrototypeOf(Bold)).apply(this, arguments));
+  }
+
+  _createClass(Bold, [{
+    key: 'optimize',
+    value: function optimize(context) {
+      _get(Bold.prototype.__proto__ || Object.getPrototypeOf(Bold.prototype), 'optimize', this).call(this, context);
+      if (this.domNode.tagName !== this.statics.tagName[0]) {
+        this.replaceWith(this.statics.blotName);
+      }
+    }
+  }], [{
+    key: 'create',
+    value: function create() {
+      return _get(Bold.__proto__ || Object.getPrototypeOf(Bold), 'create', this).call(this);
+    }
+  }, {
+    key: 'formats',
+    value: function formats() {
+      return true;
+    }
+  }]);
+
+  return Bold;
+}(_inline2.default);
+
+Bold.blotName = 'bold';
+Bold.tagName = ['STRONG', 'B'];
+
+Bold.defaultChild = 'break';
+
+exports.default = Bold;
+var BoldStyle = exports.BoldStyle = new _parchment2.default.Attributor.Style('bold-<alt>', 'font-weight', { scope: _parchment2.default.Scope.INLINE });
+
+/***/ }),
+/* 57 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.addControls = exports.default = undefined;
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _quillDelta = __webpack_require__(2);
+
+var _quillDelta2 = _interopRequireDefault(_quillDelta);
+
+var _parchment = __webpack_require__(0);
+
+var _parchment2 = _interopRequireDefault(_parchment);
+
+var _quill = __webpack_require__(5);
+
+var _quill2 = _interopRequireDefault(_quill);
+
+var _logger = __webpack_require__(10);
+
+var _logger2 = _interopRequireDefault(_logger);
+
+var _module = __webpack_require__(9);
+
+var _module2 = _interopRequireDefault(_module);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var debug = (0, _logger2.default)('quill:toolbar');
+
+var Toolbar = function (_Module) {
+  _inherits(Toolbar, _Module);
+
+  function Toolbar(quill, options) {
+    _classCallCheck(this, Toolbar);
+
+    var _this = _possibleConstructorReturn(this, (Toolbar.__proto__ || Object.getPrototypeOf(Toolbar)).call(this, quill, options));
+
+    if (Array.isArray(_this.options.container)) {
+      var container = document.createElement('div');
+      addControls(container, _this.options.container);
+      quill.container.parentNode.insertBefore(container, quill.container);
+      _this.container = container;
+    } else if (typeof _this.options.container === 'string') {
+      _this.container = document.querySelector(_this.options.container);
+    } else {
+      _this.container = _this.options.container;
+    }
+    if (!(_this.container instanceof HTMLElement)) {
+      var _ret;
+
+      return _ret = debug.error('Container required for toolbar', _this.options), _possibleConstructorReturn(_this, _ret);
+    }
+    _this.container.classList.add('ql-toolbar');
+    _this.controls = [];
+    _this.handlers = {};
+    Object.keys(_this.options.handlers).forEach(function (format) {
+      _this.addHandler(format, _this.options.handlers[format]);
+    });
+    [].forEach.call(_this.container.querySelectorAll('button, select'), function (input) {
+      _this.attach(input);
+    });
+    _this.quill.on(_quill2.default.events.EDITOR_CHANGE, function (type, range) {
+      if (type === _quill2.default.events.SELECTION_CHANGE) {
+        _this.update(range);
+      }
+    });
+    _this.quill.on(_quill2.default.events.SCROLL_OPTIMIZE, function () {
+      var _this$quill$selection = _this.quill.selection.getRange(),
+          _this$quill$selection2 = _slicedToArray(_this$quill$selection, 1),
+          range = _this$quill$selection2[0]; // quill.getSelection triggers update
+
+
+      _this.update(range);
+    });
+    return _this;
+  }
+
+  _createClass(Toolbar, [{
+    key: 'addHandler',
+    value: function addHandler(format, handler) {
+      this.handlers[format] = handler;
+    }
+  }, {
+    key: 'attach',
+    value: function attach(input) {
+      var _this2 = this;
+
+      var format = [].find.call(input.classList, function (className) {
+        return className.indexOf('ql-') === 0;
+      });
+      if (!format) return;
+      format = format.slice('ql-'.length);
+      if (input.tagName === 'BUTTON') {
+        input.setAttribute('type', 'button');
+      }
+      if (this.handlers[format] == null) {
+        if (this.quill.scroll.whitelist != null && this.quill.scroll.whitelist[format] == null) {
+          debug.warn('ignoring attaching to disabled format', format, input);
+          return;
+        }
+        if (_parchment2.default.query(format) == null) {
+          debug.warn('ignoring attaching to nonexistent format', format, input);
+          return;
+        }
+      }
+      var eventName = input.tagName === 'SELECT' ? 'change' : 'click';
+      input.addEventListener(eventName, function (e) {
+        var value = void 0;
+        if (input.tagName === 'SELECT') {
+          if (input.selectedIndex < 0) return;
+          var selected = input.options[input.selectedIndex];
+          if (selected.hasAttribute('selected')) {
+            value = false;
+          } else {
+            value = selected.value || false;
+          }
+        } else {
+          if (input.classList.contains('ql-active')) {
+            value = false;
+          } else {
+            value = input.value || !input.hasAttribute('value');
+          }
+          e.preventDefault();
+        }
+        _this2.quill.focus();
+
+        var _quill$selection$getR = _this2.quill.selection.getRange(),
+            _quill$selection$getR2 = _slicedToArray(_quill$selection$getR, 1),
+            range = _quill$selection$getR2[0];
+
+        if (_this2.handlers[format] != null) {
+          _this2.handlers[format].call(_this2, value);
+        } else if (_parchment2.default.query(format).prototype instanceof _parchment2.default.Embed) {
+          value = prompt('Enter ' + format);
+          if (!value) return;
+          _this2.quill.updateContents(new _quillDelta2.default().retain(range.index).delete(range.length).insert(_defineProperty({}, format, value)), _quill2.default.sources.USER);
+        } else {
+          _this2.quill.format(format, value, _quill2.default.sources.USER);
+        }
+        _this2.update(range);
+      });
+      // TODO use weakmap
+      this.controls.push([format, input]);
+    }
+  }, {
+    key: 'update',
+    value: function update(range) {
+      var formats = range == null ? {} : this.quill.getFormat(range);
+      this.controls.forEach(function (pair) {
+        var _pair = _slicedToArray(pair, 2),
+            format = _pair[0],
+            input = _pair[1];
+
+        if (input.tagName === 'SELECT') {
+          var option = void 0;
+          if (range == null) {
+            option = null;
+          } else if (formats[format] == null) {
+            option = input.querySelector('option[selected]');
+          } else if (!Array.isArray(formats[format])) {
+            var value = formats[format];
+            if (typeof value === 'string') {
+              value = value.replace(/\"/g, '\\"');
+            }
+            option = input.querySelector('option[value="' + value + '"]');
+          }
+          if (option == null) {
+            input.value = ''; // TODO make configurable?
+            input.selectedIndex = -1;
+          } else {
+            option.selected = true;
+          }
+        } else {
+          if (range == null) {
+            input.classList.remove('ql-active');
+          } else if (input.hasAttribute('value')) {
+            // both being null should match (default values)
+            // '1' should match with 1 (headers)
+            var isActive = formats[format] === input.getAttribute('value') || formats[format] != null && formats[format].toString() === input.getAttribute('value') || formats[format] == null && !input.getAttribute('value');
+            input.classList.toggle('ql-active', isActive);
+          } else {
+            input.classList.toggle('ql-active', formats[format] != null);
+          }
+        }
+      });
+    }
+  }]);
+
+  return Toolbar;
+}(_module2.default);
+
+Toolbar.DEFAULTS = {};
+
+function addButton(container, format, value) {
+  var input = document.createElement('button');
+  input.setAttribute('type', 'button');
+  input.classList.add('ql-' + format);
+  if (value != null) {
+    input.value = value;
+  }
+  container.appendChild(input);
+}
+
+function addControls(container, groups) {
+  if (!Array.isArray(groups[0])) {
+    groups = [groups];
+  }
+  groups.forEach(function (controls) {
+    var group = document.createElement('span');
+    group.classList.add('ql-formats');
+    controls.forEach(function (control) {
+      if (typeof control === 'string') {
+        addButton(group, control);
+      } else {
+        var format = Object.keys(control)[0];
+        var value = control[format];
+        if (Array.isArray(value)) {
+          addSelect(group, format, value);
+        } else {
+          addButton(group, format, value);
+        }
+      }
+    });
+    container.appendChild(group);
+  });
+}
+
+function addSelect(container, format, values) {
+  var input = document.createElement('select');
+  input.classList.add('ql-' + format);
+  values.forEach(function (value) {
+    var option = document.createElement('option');
+    if (value !== false) {
+      option.setAttribute('value', value);
+    } else {
+      option.setAttribute('selected', 'selected');
+    }
+    input.appendChild(option);
+  });
+  container.appendChild(input);
+}
+
+Toolbar.DEFAULTS = {
+  container: null,
+  handlers: {
+    clean: function clean() {
+      var _this3 = this;
+
+      var range = this.quill.getSelection();
+      if (range == null) return;
+      if (range.length == 0) {
+        var formats = this.quill.getFormat();
+        Object.keys(formats).forEach(function (name) {
+          // Clean functionality in existing apps only clean inline formats
+          if (_parchment2.default.query(name, _parchment2.default.Scope.INLINE) != null) {
+            _this3.quill.format(name, false);
+          }
+        });
+      } else {
+        this.quill.removeFormat(range, _quill2.default.sources.USER);
+      }
+    },
+    direction: function direction(value) {
+      var align = this.quill.getFormat()['align'];
+      if (value === 'rtl' && align == null) {
+        this.quill.format('align', 'right', _quill2.default.sources.USER);
+      } else if (!value && align === 'right') {
+        this.quill.format('align', false, _quill2.default.sources.USER);
+      }
+      this.quill.format('direction', value, _quill2.default.sources.USER);
+    },
+    indent: function indent(value) {
+      var range = this.quill.getSelection();
+      var formats = this.quill.getFormat(range);
+      var indent = parseInt(formats.indent || 0);
+      if (value === '+1' || value === '-1') {
+        var modifier = value === '+1' ? 1 : -1;
+        if (formats.direction === 'rtl') modifier *= -1;
+        this.quill.format('indent', indent + modifier, _quill2.default.sources.USER);
+      }
+    },
+    link: function link(value) {
+      if (value === true) {
+        value = prompt('Enter link URL:');
+      }
+      this.quill.format('link', value, _quill2.default.sources.USER);
+    },
+    list: function list(value) {
+      var range = this.quill.getSelection();
+      var formats = this.quill.getFormat(range);
+      if (value === 'check') {
+        if (formats['list'] === 'checked' || formats['list'] === 'unchecked') {
+          this.quill.format('list', false, _quill2.default.sources.USER);
+        } else {
+          this.quill.format('list', 'unchecked', _quill2.default.sources.USER);
+        }
+      } else {
+        this.quill.format('list', value, _quill2.default.sources.USER);
+      }
+    }
+  }
+};
+
+exports.default = Toolbar;
+exports.addControls = addControls;
+
+/***/ }),
+/* 58 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <polyline class=\"ql-even ql-stroke\" points=\"5 7 3 9 5 11\"></polyline> <polyline class=\"ql-even ql-stroke\" points=\"13 7 15 9 13 11\"></polyline> <line class=ql-stroke x1=10 x2=8 y1=5 y2=13></line> </svg>";
+
+/***/ }),
+/* 59 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _picker = __webpack_require__(28);
+
+var _picker2 = _interopRequireDefault(_picker);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ColorPicker = function (_Picker) {
+  _inherits(ColorPicker, _Picker);
+
+  function ColorPicker(select, label) {
+    _classCallCheck(this, ColorPicker);
+
+    var _this = _possibleConstructorReturn(this, (ColorPicker.__proto__ || Object.getPrototypeOf(ColorPicker)).call(this, select));
+
+    _this.label.innerHTML = label;
+    _this.container.classList.add('ql-color-picker');
+    [].slice.call(_this.container.querySelectorAll('.ql-picker-item'), 0, 7).forEach(function (item) {
+      item.classList.add('ql-primary');
+    });
+    return _this;
+  }
+
+  _createClass(ColorPicker, [{
+    key: 'buildItem',
+    value: function buildItem(option) {
+      var item = _get(ColorPicker.prototype.__proto__ || Object.getPrototypeOf(ColorPicker.prototype), 'buildItem', this).call(this, option);
+      item.style.backgroundColor = option.getAttribute('value') || '';
+      return item;
+    }
+  }, {
+    key: 'selectItem',
+    value: function selectItem(item, trigger) {
+      _get(ColorPicker.prototype.__proto__ || Object.getPrototypeOf(ColorPicker.prototype), 'selectItem', this).call(this, item, trigger);
+      var colorLabel = this.label.querySelector('.ql-color-label');
+      var value = item ? item.getAttribute('data-value') || '' : '';
+      if (colorLabel) {
+        if (colorLabel.tagName === 'line') {
+          colorLabel.style.stroke = value;
+        } else {
+          colorLabel.style.fill = value;
+        }
+      }
+    }
+  }]);
+
+  return ColorPicker;
+}(_picker2.default);
+
+exports.default = ColorPicker;
+
+/***/ }),
+/* 60 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _picker = __webpack_require__(28);
+
+var _picker2 = _interopRequireDefault(_picker);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var IconPicker = function (_Picker) {
+  _inherits(IconPicker, _Picker);
+
+  function IconPicker(select, icons) {
+    _classCallCheck(this, IconPicker);
+
+    var _this = _possibleConstructorReturn(this, (IconPicker.__proto__ || Object.getPrototypeOf(IconPicker)).call(this, select));
+
+    _this.container.classList.add('ql-icon-picker');
+    [].forEach.call(_this.container.querySelectorAll('.ql-picker-item'), function (item) {
+      item.innerHTML = icons[item.getAttribute('data-value') || ''];
+    });
+    _this.defaultItem = _this.container.querySelector('.ql-selected');
+    _this.selectItem(_this.defaultItem);
+    return _this;
+  }
+
+  _createClass(IconPicker, [{
+    key: 'selectItem',
+    value: function selectItem(item, trigger) {
+      _get(IconPicker.prototype.__proto__ || Object.getPrototypeOf(IconPicker.prototype), 'selectItem', this).call(this, item, trigger);
+      item = item || this.defaultItem;
+      this.label.innerHTML = item.innerHTML;
+    }
+  }]);
+
+  return IconPicker;
+}(_picker2.default);
+
+exports.default = IconPicker;
+
+/***/ }),
+/* 61 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Tooltip = function () {
+  function Tooltip(quill, boundsContainer) {
+    var _this = this;
+
+    _classCallCheck(this, Tooltip);
+
+    this.quill = quill;
+    this.boundsContainer = boundsContainer || document.body;
+    this.root = quill.addContainer('ql-tooltip');
+    this.root.innerHTML = this.constructor.TEMPLATE;
+    if (this.quill.root === this.quill.scrollingContainer) {
+      this.quill.root.addEventListener('scroll', function () {
+        _this.root.style.marginTop = -1 * _this.quill.root.scrollTop + 'px';
+      });
+    }
+    this.hide();
+  }
+
+  _createClass(Tooltip, [{
+    key: 'hide',
+    value: function hide() {
+      this.root.classList.add('ql-hidden');
+    }
+  }, {
+    key: 'position',
+    value: function position(reference) {
+      var left = reference.left + reference.width / 2 - this.root.offsetWidth / 2;
+      // root.scrollTop should be 0 if scrollContainer !== root
+      var top = reference.bottom + this.quill.root.scrollTop;
+      this.root.style.left = left + 'px';
+      this.root.style.top = top + 'px';
+      this.root.classList.remove('ql-flip');
+      var containerBounds = this.boundsContainer.getBoundingClientRect();
+      var rootBounds = this.root.getBoundingClientRect();
+      var shift = 0;
+      if (rootBounds.right > containerBounds.right) {
+        shift = containerBounds.right - rootBounds.right;
+        this.root.style.left = left + shift + 'px';
+      }
+      if (rootBounds.left < containerBounds.left) {
+        shift = containerBounds.left - rootBounds.left;
+        this.root.style.left = left + shift + 'px';
+      }
+      if (rootBounds.bottom > containerBounds.bottom) {
+        var height = rootBounds.bottom - rootBounds.top;
+        var verticalShift = reference.bottom - reference.top + height;
+        this.root.style.top = top - verticalShift + 'px';
+        this.root.classList.add('ql-flip');
+      }
+      return shift;
+    }
+  }, {
+    key: 'show',
+    value: function show() {
+      this.root.classList.remove('ql-editing');
+      this.root.classList.remove('ql-hidden');
+    }
+  }]);
+
+  return Tooltip;
+}();
+
+exports.default = Tooltip;
+
+/***/ }),
+/* 62 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _extend = __webpack_require__(3);
+
+var _extend2 = _interopRequireDefault(_extend);
+
+var _emitter = __webpack_require__(8);
+
+var _emitter2 = _interopRequireDefault(_emitter);
+
+var _base = __webpack_require__(43);
+
+var _base2 = _interopRequireDefault(_base);
+
+var _link = __webpack_require__(27);
+
+var _link2 = _interopRequireDefault(_link);
+
+var _selection = __webpack_require__(15);
+
+var _icons = __webpack_require__(41);
+
+var _icons2 = _interopRequireDefault(_icons);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var TOOLBAR_CONFIG = [[{ header: ['1', '2', '3', false] }], ['bold', 'italic', 'underline', 'link'], [{ list: 'ordered' }, { list: 'bullet' }], ['clean']];
+
+var SnowTheme = function (_BaseTheme) {
+  _inherits(SnowTheme, _BaseTheme);
+
+  function SnowTheme(quill, options) {
+    _classCallCheck(this, SnowTheme);
+
+    if (options.modules.toolbar != null && options.modules.toolbar.container == null) {
+      options.modules.toolbar.container = TOOLBAR_CONFIG;
+    }
+
+    var _this = _possibleConstructorReturn(this, (SnowTheme.__proto__ || Object.getPrototypeOf(SnowTheme)).call(this, quill, options));
+
+    _this.quill.container.classList.add('ql-snow');
+    return _this;
+  }
+
+  _createClass(SnowTheme, [{
+    key: 'extendToolbar',
+    value: function extendToolbar(toolbar) {
+      toolbar.container.classList.add('ql-snow');
+      this.buildButtons([].slice.call(toolbar.container.querySelectorAll('button')), _icons2.default);
+      this.buildPickers([].slice.call(toolbar.container.querySelectorAll('select')), _icons2.default);
+      this.tooltip = new SnowTooltip(this.quill, this.options.bounds);
+      if (toolbar.container.querySelector('.ql-link')) {
+        this.quill.keyboard.addBinding({ key: 'K', shortKey: true }, function (range, context) {
+          toolbar.handlers['link'].call(toolbar, !context.format.link);
+        });
+      }
+    }
+  }]);
+
+  return SnowTheme;
+}(_base2.default);
+
+SnowTheme.DEFAULTS = (0, _extend2.default)(true, {}, _base2.default.DEFAULTS, {
+  modules: {
+    toolbar: {
+      handlers: {
+        link: function link(value) {
+          if (value) {
+            var range = this.quill.getSelection();
+            if (range == null || range.length == 0) return;
+            var preview = this.quill.getText(range);
+            if (/^\S+@\S+\.\S+$/.test(preview) && preview.indexOf('mailto:') !== 0) {
+              preview = 'mailto:' + preview;
+            }
+            var tooltip = this.quill.theme.tooltip;
+            tooltip.edit('link', preview);
+          } else {
+            this.quill.format('link', false);
+          }
+        }
+      }
+    }
+  }
+});
+
+var SnowTooltip = function (_BaseTooltip) {
+  _inherits(SnowTooltip, _BaseTooltip);
+
+  function SnowTooltip(quill, bounds) {
+    _classCallCheck(this, SnowTooltip);
+
+    var _this2 = _possibleConstructorReturn(this, (SnowTooltip.__proto__ || Object.getPrototypeOf(SnowTooltip)).call(this, quill, bounds));
+
+    _this2.preview = _this2.root.querySelector('a.ql-preview');
+    return _this2;
+  }
+
+  _createClass(SnowTooltip, [{
+    key: 'listen',
+    value: function listen() {
+      var _this3 = this;
+
+      _get(SnowTooltip.prototype.__proto__ || Object.getPrototypeOf(SnowTooltip.prototype), 'listen', this).call(this);
+      this.root.querySelector('a.ql-action').addEventListener('click', function (event) {
+        if (_this3.root.classList.contains('ql-editing')) {
+          _this3.save();
+        } else {
+          _this3.edit('link', _this3.preview.textContent);
+        }
+        event.preventDefault();
+      });
+      this.root.querySelector('a.ql-remove').addEventListener('click', function (event) {
+        if (_this3.linkRange != null) {
+          var range = _this3.linkRange;
+          _this3.restoreFocus();
+          _this3.quill.formatText(range, 'link', false, _emitter2.default.sources.USER);
+          delete _this3.linkRange;
+        }
+        event.preventDefault();
+        _this3.hide();
+      });
+      this.quill.on(_emitter2.default.events.SELECTION_CHANGE, function (range, oldRange, source) {
+        if (range == null) return;
+        if (range.length === 0 && source === _emitter2.default.sources.USER) {
+          var _quill$scroll$descend = _this3.quill.scroll.descendant(_link2.default, range.index),
+              _quill$scroll$descend2 = _slicedToArray(_quill$scroll$descend, 2),
+              link = _quill$scroll$descend2[0],
+              offset = _quill$scroll$descend2[1];
+
+          if (link != null) {
+            _this3.linkRange = new _selection.Range(range.index - offset, link.length());
+            var preview = _link2.default.formats(link.domNode);
+            _this3.preview.textContent = preview;
+            _this3.preview.setAttribute('href', preview);
+            _this3.show();
+            _this3.position(_this3.quill.getBounds(_this3.linkRange));
+            return;
+          }
+        } else {
+          delete _this3.linkRange;
+        }
+        _this3.hide();
+      });
+    }
+  }, {
+    key: 'show',
+    value: function show() {
+      _get(SnowTooltip.prototype.__proto__ || Object.getPrototypeOf(SnowTooltip.prototype), 'show', this).call(this);
+      this.root.removeAttribute('data-mode');
+    }
+  }]);
+
+  return SnowTooltip;
+}(_base.BaseTooltip);
+
+SnowTooltip.TEMPLATE = ['<a class="ql-preview" target="_blank" href="about:blank"></a>', '<input type="text" data-formula="e=mc^2" data-link="https://quilljs.com" data-video="Embed URL">', '<a class="ql-action"></a>', '<a class="ql-remove"></a>'].join('');
+
+exports.default = SnowTheme;
+
+/***/ }),
+/* 63 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = __webpack_require__(29);
+
+var _core2 = _interopRequireDefault(_core);
+
+var _align = __webpack_require__(36);
+
+var _direction = __webpack_require__(38);
+
+var _indent = __webpack_require__(64);
+
+var _blockquote = __webpack_require__(65);
+
+var _blockquote2 = _interopRequireDefault(_blockquote);
+
+var _header = __webpack_require__(66);
+
+var _header2 = _interopRequireDefault(_header);
+
+var _list = __webpack_require__(67);
+
+var _list2 = _interopRequireDefault(_list);
+
+var _background = __webpack_require__(37);
+
+var _color = __webpack_require__(26);
+
+var _font = __webpack_require__(39);
+
+var _size = __webpack_require__(40);
+
+var _bold = __webpack_require__(56);
+
+var _bold2 = _interopRequireDefault(_bold);
+
+var _italic = __webpack_require__(68);
+
+var _italic2 = _interopRequireDefault(_italic);
+
+var _link = __webpack_require__(27);
+
+var _link2 = _interopRequireDefault(_link);
+
+var _script = __webpack_require__(69);
+
+var _script2 = _interopRequireDefault(_script);
+
+var _strike = __webpack_require__(70);
+
+var _strike2 = _interopRequireDefault(_strike);
+
+var _underline = __webpack_require__(71);
+
+var _underline2 = _interopRequireDefault(_underline);
+
+var _image = __webpack_require__(72);
+
+var _image2 = _interopRequireDefault(_image);
+
+var _video = __webpack_require__(73);
+
+var _video2 = _interopRequireDefault(_video);
+
+var _code = __webpack_require__(13);
+
+var _code2 = _interopRequireDefault(_code);
+
+var _formula = __webpack_require__(74);
+
+var _formula2 = _interopRequireDefault(_formula);
+
+var _syntax = __webpack_require__(75);
+
+var _syntax2 = _interopRequireDefault(_syntax);
+
+var _toolbar = __webpack_require__(57);
+
+var _toolbar2 = _interopRequireDefault(_toolbar);
+
+var _icons = __webpack_require__(41);
+
+var _icons2 = _interopRequireDefault(_icons);
+
+var _picker = __webpack_require__(28);
+
+var _picker2 = _interopRequireDefault(_picker);
+
+var _colorPicker = __webpack_require__(59);
+
+var _colorPicker2 = _interopRequireDefault(_colorPicker);
+
+var _iconPicker = __webpack_require__(60);
+
+var _iconPicker2 = _interopRequireDefault(_iconPicker);
+
+var _tooltip = __webpack_require__(61);
+
+var _tooltip2 = _interopRequireDefault(_tooltip);
+
+var _bubble = __webpack_require__(108);
+
+var _bubble2 = _interopRequireDefault(_bubble);
+
+var _snow = __webpack_require__(62);
+
+var _snow2 = _interopRequireDefault(_snow);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.register({
+  'attributors/attribute/direction': _direction.DirectionAttribute,
+
+  'attributors/class/align': _align.AlignClass,
+  'attributors/class/background': _background.BackgroundClass,
+  'attributors/class/color': _color.ColorClass,
+  'attributors/class/direction': _direction.DirectionClass,
+  'attributors/class/font': _font.FontClass,
+  'attributors/class/size': _size.SizeClass,
+
+  'attributors/style/align': _align.AlignStyle,
+  'attributors/style/background': _background.BackgroundStyle,
+  'attributors/style/color': _color.ColorStyle,
+  'attributors/style/direction': _direction.DirectionStyle,
+  'attributors/style/font': _font.FontStyle,
+  'attributors/style/size': _size.SizeStyle
+}, true);
+
+_core2.default.register({
+  'formats/align': _align.AlignClass,
+  'formats/direction': _direction.DirectionClass,
+  'formats/indent': _indent.IndentClass,
+
+  'formats/background': _background.BackgroundStyle,
+  'formats/color': _color.ColorStyle,
+  'formats/font': _font.FontClass,
+  'formats/size': _size.SizeClass,
+
+  'formats/blockquote': _blockquote2.default,
+  'formats/code-block': _code2.default,
+  'formats/header': _header2.default,
+  'formats/list': _list2.default,
+
+  'formats/bold': _bold2.default,
+  'formats/boldStyle': _bold.BoldStyle,
+  'formats/code': _code.Code,
+  'formats/italic': _italic2.default,
+  'formats/italicStyle': _italic.ItalicStyle,
+  'formats/link': _link2.default,
+  'formats/script': _script2.default,
+  'formats/strike': _strike2.default,
+  'formats/underline': _underline2.default,
+  'formats/underlineStrikeStyle': _underline.UnderlineStrikeStyle,
+
+  'formats/image': _image2.default,
+  'formats/video': _video2.default,
+
+  'formats/list/item': _list.ListItem,
+
+  'modules/formula': _formula2.default,
+  'modules/syntax': _syntax2.default,
+  'modules/toolbar': _toolbar2.default,
+
+  'themes/bubble': _bubble2.default,
+  'themes/snow': _snow2.default,
+
+  'ui/icons': _icons2.default,
+  'ui/picker': _picker2.default,
+  'ui/icon-picker': _iconPicker2.default,
+  'ui/color-picker': _colorPicker2.default,
+  'ui/tooltip': _tooltip2.default
+}, true);
+
+exports.default = _core2.default;
+
+/***/ }),
+/* 64 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.IndentClass = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _parchment = __webpack_require__(0);
+
+var _parchment2 = _interopRequireDefault(_parchment);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var IdentAttributor = function (_Parchment$Attributor) {
+  _inherits(IdentAttributor, _Parchment$Attributor);
+
+  function IdentAttributor() {
+    _classCallCheck(this, IdentAttributor);
+
+    return _possibleConstructorReturn(this, (IdentAttributor.__proto__ || Object.getPrototypeOf(IdentAttributor)).apply(this, arguments));
+  }
+
+  _createClass(IdentAttributor, [{
+    key: 'add',
+    value: function add(node, value) {
+      if (value === '+1' || value === '-1') {
+        var indent = this.value(node) || 0;
+        value = value === '+1' ? indent + 1 : indent - 1;
+      }
+      if (value === 0) {
+        this.remove(node);
+        return true;
+      } else {
+        return _get(IdentAttributor.prototype.__proto__ || Object.getPrototypeOf(IdentAttributor.prototype), 'add', this).call(this, node, value);
+      }
+    }
+  }, {
+    key: 'canAdd',
+    value: function canAdd(node, value) {
+      return _get(IdentAttributor.prototype.__proto__ || Object.getPrototypeOf(IdentAttributor.prototype), 'canAdd', this).call(this, node, value) || _get(IdentAttributor.prototype.__proto__ || Object.getPrototypeOf(IdentAttributor.prototype), 'canAdd', this).call(this, node, parseInt(value));
+    }
+  }, {
+    key: 'value',
+    value: function value(node, force) {
+      return parseInt(_get(IdentAttributor.prototype.__proto__ || Object.getPrototypeOf(IdentAttributor.prototype), 'value', this).call(this, node, force)) || undefined; // Don't return NaN
+    }
+  }]);
+
+  return IdentAttributor;
+}(_parchment2.default.Attributor.Class);
+
+var IndentClass = new IdentAttributor('indent', 'ql-indent', {
+  scope: _parchment2.default.Scope.BLOCK,
+  whitelist: [1, 2, 3, 4, 5, 6, 7, 8]
+});
+
+exports.IndentClass = IndentClass;
+
+/***/ }),
+/* 65 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _block = __webpack_require__(4);
+
+var _block2 = _interopRequireDefault(_block);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Blockquote = function (_Block) {
+  _inherits(Blockquote, _Block);
+
+  function Blockquote() {
+    _classCallCheck(this, Blockquote);
+
+    return _possibleConstructorReturn(this, (Blockquote.__proto__ || Object.getPrototypeOf(Blockquote)).apply(this, arguments));
+  }
+
+  return Blockquote;
+}(_block2.default);
+
+Blockquote.blotName = 'blockquote';
+Blockquote.tagName = 'blockquote';
+
+exports.default = Blockquote;
+
+/***/ }),
+/* 66 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _block = __webpack_require__(4);
+
+var _block2 = _interopRequireDefault(_block);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Header = function (_Block) {
+  _inherits(Header, _Block);
+
+  function Header() {
+    _classCallCheck(this, Header);
+
+    return _possibleConstructorReturn(this, (Header.__proto__ || Object.getPrototypeOf(Header)).apply(this, arguments));
+  }
+
+  _createClass(Header, null, [{
+    key: 'formats',
+    value: function formats(domNode) {
+      return this.tagName.indexOf(domNode.tagName) + 1;
+    }
+  }]);
+
+  return Header;
+}(_block2.default);
+
+Header.blotName = 'header';
+Header.tagName = ['H1', 'H2', 'H3', 'H4', 'H5', 'H6'];
+
+exports.default = Header;
+
+/***/ }),
+/* 67 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = exports.ListItem = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _parchment = __webpack_require__(0);
+
+var _parchment2 = _interopRequireDefault(_parchment);
+
+var _block = __webpack_require__(4);
+
+var _block2 = _interopRequireDefault(_block);
+
+var _container = __webpack_require__(25);
+
+var _container2 = _interopRequireDefault(_container);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ListItem = function (_Block) {
+  _inherits(ListItem, _Block);
+
+  function ListItem() {
+    _classCallCheck(this, ListItem);
+
+    return _possibleConstructorReturn(this, (ListItem.__proto__ || Object.getPrototypeOf(ListItem)).apply(this, arguments));
+  }
+
+  _createClass(ListItem, [{
+    key: 'format',
+    value: function format(name, value) {
+      if (name === List.blotName && !value) {
+        this.replaceWith(_parchment2.default.create(this.statics.scope));
+      } else {
+        _get(ListItem.prototype.__proto__ || Object.getPrototypeOf(ListItem.prototype), 'format', this).call(this, name, value);
+      }
+    }
+  }, {
+    key: 'remove',
+    value: function remove() {
+      if (this.prev == null && this.next == null) {
+        this.parent.remove();
+      } else {
+        _get(ListItem.prototype.__proto__ || Object.getPrototypeOf(ListItem.prototype), 'remove', this).call(this);
+      }
+    }
+  }, {
+    key: 'replaceWith',
+    value: function replaceWith(name, value) {
+      this.parent.isolate(this.offset(this.parent), this.length());
+      if (name === this.parent.statics.blotName) {
+        this.parent.replaceWith(name, value);
+        return this;
+      } else {
+        this.parent.unwrap();
+        return _get(ListItem.prototype.__proto__ || Object.getPrototypeOf(ListItem.prototype), 'replaceWith', this).call(this, name, value);
+      }
+    }
+  }], [{
+    key: 'formats',
+    value: function formats(domNode) {
+      return domNode.tagName === this.tagName ? undefined : _get(ListItem.__proto__ || Object.getPrototypeOf(ListItem), 'formats', this).call(this, domNode);
+    }
+  }]);
+
+  return ListItem;
+}(_block2.default);
+
+ListItem.blotName = 'list-item';
+ListItem.tagName = 'LI';
+
+var List = function (_Container) {
+  _inherits(List, _Container);
+
+  _createClass(List, null, [{
+    key: 'create',
+    value: function create(value) {
+      var tagName = value === 'ordered' ? 'OL' : 'UL';
+      var node = _get(List.__proto__ || Object.getPrototypeOf(List), 'create', this).call(this, tagName);
+      if (value === 'checked' || value === 'unchecked') {
+        node.setAttribute('data-checked', value === 'checked');
+      }
+      return node;
+    }
+  }, {
+    key: 'formats',
+    value: function formats(domNode) {
+      if (domNode.tagName === 'OL') return 'ordered';
+      if (domNode.tagName === 'UL') {
+        if (domNode.hasAttribute('data-checked')) {
+          return domNode.getAttribute('data-checked') === 'true' ? 'checked' : 'unchecked';
+        } else {
+          return 'bullet';
+        }
+      }
+      return undefined;
+    }
+  }]);
+
+  function List(domNode) {
+    _classCallCheck(this, List);
+
+    var _this2 = _possibleConstructorReturn(this, (List.__proto__ || Object.getPrototypeOf(List)).call(this, domNode));
+
+    var listEventHandler = function listEventHandler(e) {
+      if (e.target.parentNode !== domNode) return;
+      var format = _this2.statics.formats(domNode);
+      var blot = _parchment2.default.find(e.target);
+      if (format === 'checked') {
+        blot.format('list', 'unchecked');
+      } else if (format === 'unchecked') {
+        blot.format('list', 'checked');
+      }
+    };
+
+    domNode.addEventListener('touchstart', listEventHandler);
+    domNode.addEventListener('mousedown', listEventHandler);
+    return _this2;
+  }
+
+  _createClass(List, [{
+    key: 'format',
+    value: function format(name, value) {
+      if (this.children.length > 0) {
+        this.children.tail.format(name, value);
+      }
+    }
+  }, {
+    key: 'formats',
+    value: function formats() {
+      // We don't inherit from FormatBlot
+      return _defineProperty({}, this.statics.blotName, this.statics.formats(this.domNode));
+    }
+  }, {
+    key: 'insertBefore',
+    value: function insertBefore(blot, ref) {
+      if (blot instanceof ListItem) {
+        _get(List.prototype.__proto__ || Object.getPrototypeOf(List.prototype), 'insertBefore', this).call(this, blot, ref);
+      } else {
+        var index = ref == null ? this.length() : ref.offset(this);
+        var after = this.split(index);
+        after.parent.insertBefore(blot, after);
+      }
+    }
+  }, {
+    key: 'optimize',
+    value: function optimize(context) {
+      _get(List.prototype.__proto__ || Object.getPrototypeOf(List.prototype), 'optimize', this).call(this, context);
+      var next = this.next;
+      if (next != null && next.prev === this && next.statics.blotName === this.statics.blotName && next.domNode.tagName === this.domNode.tagName && next.domNode.getAttribute('data-checked') === this.domNode.getAttribute('data-checked')) {
+        next.moveChildren(this);
+        next.remove();
+      }
+    }
+  }, {
+    key: 'replace',
+    value: function replace(target) {
+      if (target.statics.blotName !== this.statics.blotName) {
+        var item = _parchment2.default.create(this.statics.defaultChild);
+        target.moveChildren(item);
+        this.appendChild(item);
+      }
+      _get(List.prototype.__proto__ || Object.getPrototypeOf(List.prototype), 'replace', this).call(this, target);
+    }
+  }]);
+
+  return List;
+}(_container2.default);
+
+List.blotName = 'list';
+List.scope = _parchment2.default.Scope.BLOCK_BLOT;
+List.tagName = ['OL', 'UL'];
+List.defaultChild = 'list-item';
+List.allowedChildren = [ListItem];
+
+exports.ListItem = ListItem;
+exports.default = List;
+
+/***/ }),
+/* 68 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.ItalicStyle = undefined;
+
+var _parchment = __webpack_require__(0);
+
+var _parchment2 = _interopRequireDefault(_parchment);
+
+var _bold = __webpack_require__(56);
+
+var _bold2 = _interopRequireDefault(_bold);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Italic = function (_Bold) {
+  _inherits(Italic, _Bold);
+
+  function Italic() {
+    _classCallCheck(this, Italic);
+
+    return _possibleConstructorReturn(this, (Italic.__proto__ || Object.getPrototypeOf(Italic)).apply(this, arguments));
+  }
+
+  return Italic;
+}(_bold2.default);
+
+Italic.blotName = 'italic';
+Italic.tagName = ['EM', 'I'];
+
+exports.default = Italic;
+var ItalicStyle = exports.ItalicStyle = new _parchment2.default.Attributor.Style('italic-<alt>', 'font-style', { scope: _parchment2.default.Scope.INLINE });
+
+/***/ }),
+/* 69 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _inline = __webpack_require__(6);
+
+var _inline2 = _interopRequireDefault(_inline);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Script = function (_Inline) {
+  _inherits(Script, _Inline);
+
+  function Script() {
+    _classCallCheck(this, Script);
+
+    return _possibleConstructorReturn(this, (Script.__proto__ || Object.getPrototypeOf(Script)).apply(this, arguments));
+  }
+
+  _createClass(Script, null, [{
+    key: 'create',
+    value: function create(value) {
+      if (value === 'super') {
+        return document.createElement('sup');
+      } else if (value === 'sub') {
+        return document.createElement('sub');
+      } else {
+        return _get(Script.__proto__ || Object.getPrototypeOf(Script), 'create', this).call(this, value);
+      }
+    }
+  }, {
+    key: 'formats',
+    value: function formats(domNode) {
+      if (domNode.tagName === 'SUB') return 'sub';
+      if (domNode.tagName === 'SUP') return 'super';
+      return undefined;
+    }
+  }]);
+
+  return Script;
+}(_inline2.default);
+
+Script.blotName = 'script';
+Script.tagName = ['SUB', 'SUP'];
+
+exports.default = Script;
+
+/***/ }),
+/* 70 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _inline = __webpack_require__(6);
+
+var _inline2 = _interopRequireDefault(_inline);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Strike = function (_Inline) {
+  _inherits(Strike, _Inline);
+
+  function Strike() {
+    _classCallCheck(this, Strike);
+
+    return _possibleConstructorReturn(this, (Strike.__proto__ || Object.getPrototypeOf(Strike)).apply(this, arguments));
+  }
+
+  return Strike;
+}(_inline2.default);
+
+Strike.blotName = 'strike';
+Strike.tagName = 'S';
+
+exports.default = Strike;
+
+/***/ }),
+/* 71 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.UnderlineStrikeStyle = undefined;
+
+var _parchment = __webpack_require__(0);
+
+var _parchment2 = _interopRequireDefault(_parchment);
+
+var _inline = __webpack_require__(6);
+
+var _inline2 = _interopRequireDefault(_inline);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Underline = function (_Inline) {
+  _inherits(Underline, _Inline);
+
+  function Underline() {
+    _classCallCheck(this, Underline);
+
+    return _possibleConstructorReturn(this, (Underline.__proto__ || Object.getPrototypeOf(Underline)).apply(this, arguments));
+  }
+
+  return Underline;
+}(_inline2.default);
+
+Underline.blotName = 'underline';
+Underline.tagName = 'U';
+
+exports.default = Underline;
+var UnderlineStrikeStyle = exports.UnderlineStrikeStyle = new _parchment2.default.Attributor.Style('underline-strike-<alt>', 'text-decoration-line', {
+  scope: _parchment2.default.Scope.INLINE
+});
+
+/***/ }),
+/* 72 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _parchment = __webpack_require__(0);
+
+var _parchment2 = _interopRequireDefault(_parchment);
+
+var _link = __webpack_require__(27);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ATTRIBUTES = ['alt', 'height', 'width'];
+
+var Image = function (_Parchment$Embed) {
+  _inherits(Image, _Parchment$Embed);
+
+  function Image() {
+    _classCallCheck(this, Image);
+
+    return _possibleConstructorReturn(this, (Image.__proto__ || Object.getPrototypeOf(Image)).apply(this, arguments));
+  }
+
+  _createClass(Image, [{
+    key: 'format',
+    value: function format(name, value) {
+      if (ATTRIBUTES.indexOf(name) > -1) {
+        if (value) {
+          this.domNode.setAttribute(name, value);
+        } else {
+          this.domNode.removeAttribute(name);
+        }
+      } else {
+        _get(Image.prototype.__proto__ || Object.getPrototypeOf(Image.prototype), 'format', this).call(this, name, value);
+      }
+    }
+  }], [{
+    key: 'create',
+    value: function create(value) {
+      var node = _get(Image.__proto__ || Object.getPrototypeOf(Image), 'create', this).call(this, value);
+      if (typeof value === 'string') {
+        node.setAttribute('src', this.sanitize(value));
+      }
+      return node;
+    }
+  }, {
+    key: 'formats',
+    value: function formats(domNode) {
+      return ATTRIBUTES.reduce(function (formats, attribute) {
+        if (domNode.hasAttribute(attribute)) {
+          formats[attribute] = domNode.getAttribute(attribute);
+        }
+        return formats;
+      }, {});
+    }
+  }, {
+    key: 'match',
+    value: function match(url) {
+      return (/\.(jpe?g|gif|png)$/.test(url) || /^data:image\/.+;base64/.test(url)
+      );
+    }
+  }, {
+    key: 'sanitize',
+    value: function sanitize(url) {
+      return (0, _link.sanitize)(url, ['http', 'https', 'data']) ? url : '//:0';
+    }
+  }, {
+    key: 'value',
+    value: function value(domNode) {
+      return domNode.getAttribute('src');
+    }
+  }]);
+
+  return Image;
+}(_parchment2.default.Embed);
+
+Image.blotName = 'image';
+Image.tagName = 'IMG';
+
+exports.default = Image;
+
+/***/ }),
+/* 73 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _block = __webpack_require__(4);
+
+var _link = __webpack_require__(27);
+
+var _link2 = _interopRequireDefault(_link);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ATTRIBUTES = ['height', 'width'];
+
+var Video = function (_BlockEmbed) {
+  _inherits(Video, _BlockEmbed);
+
+  function Video() {
+    _classCallCheck(this, Video);
+
+    return _possibleConstructorReturn(this, (Video.__proto__ || Object.getPrototypeOf(Video)).apply(this, arguments));
+  }
+
+  _createClass(Video, [{
+    key: 'format',
+    value: function format(name, value) {
+      if (ATTRIBUTES.indexOf(name) > -1) {
+        if (value) {
+          this.domNode.setAttribute(name, value);
+        } else {
+          this.domNode.removeAttribute(name);
+        }
+      } else {
+        _get(Video.prototype.__proto__ || Object.getPrototypeOf(Video.prototype), 'format', this).call(this, name, value);
+      }
+    }
+  }], [{
+    key: 'create',
+    value: function create(value) {
+      var node = _get(Video.__proto__ || Object.getPrototypeOf(Video), 'create', this).call(this, value);
+      node.setAttribute('frameborder', '0');
+      node.setAttribute('allowfullscreen', true);
+      node.setAttribute('src', this.sanitize(value));
+      return node;
+    }
+  }, {
+    key: 'formats',
+    value: function formats(domNode) {
+      return ATTRIBUTES.reduce(function (formats, attribute) {
+        if (domNode.hasAttribute(attribute)) {
+          formats[attribute] = domNode.getAttribute(attribute);
+        }
+        return formats;
+      }, {});
+    }
+  }, {
+    key: 'sanitize',
+    value: function sanitize(url) {
+      return _link2.default.sanitize(url);
+    }
+  }, {
+    key: 'value',
+    value: function value(domNode) {
+      return domNode.getAttribute('src');
+    }
+  }]);
+
+  return Video;
+}(_block.BlockEmbed);
+
+Video.blotName = 'video';
+Video.className = 'ql-video';
+Video.tagName = 'IFRAME';
+
+exports.default = Video;
+
+/***/ }),
+/* 74 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = exports.FormulaBlot = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _embed = __webpack_require__(35);
+
+var _embed2 = _interopRequireDefault(_embed);
+
+var _quill = __webpack_require__(5);
+
+var _quill2 = _interopRequireDefault(_quill);
+
+var _module = __webpack_require__(9);
+
+var _module2 = _interopRequireDefault(_module);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var FormulaBlot = function (_Embed) {
+  _inherits(FormulaBlot, _Embed);
+
+  function FormulaBlot() {
+    _classCallCheck(this, FormulaBlot);
+
+    return _possibleConstructorReturn(this, (FormulaBlot.__proto__ || Object.getPrototypeOf(FormulaBlot)).apply(this, arguments));
+  }
+
+  _createClass(FormulaBlot, null, [{
+    key: 'create',
+    value: function create(value) {
+      var node = _get(FormulaBlot.__proto__ || Object.getPrototypeOf(FormulaBlot), 'create', this).call(this, value);
+      if (typeof value === 'string') {
+        window.katex.render(value, node, {
+          throwOnError: false,
+          errorColor: '#f00'
+        });
+        node.setAttribute('data-value', value);
+      }
+      return node;
+    }
+  }, {
+    key: 'value',
+    value: function value(domNode) {
+      return domNode.getAttribute('data-value');
+    }
+  }]);
+
+  return FormulaBlot;
+}(_embed2.default);
+
+FormulaBlot.blotName = 'formula';
+FormulaBlot.className = 'ql-formula';
+FormulaBlot.tagName = 'SPAN';
+
+var Formula = function (_Module) {
+  _inherits(Formula, _Module);
+
+  _createClass(Formula, null, [{
+    key: 'register',
+    value: function register() {
+      _quill2.default.register(FormulaBlot, true);
+    }
+  }]);
+
+  function Formula() {
+    _classCallCheck(this, Formula);
+
+    var _this2 = _possibleConstructorReturn(this, (Formula.__proto__ || Object.getPrototypeOf(Formula)).call(this));
+
+    if (window.katex == null) {
+      throw new Error('Formula module requires KaTeX.');
+    }
+    return _this2;
+  }
+
+  return Formula;
+}(_module2.default);
+
+exports.FormulaBlot = FormulaBlot;
+exports.default = Formula;
+
+/***/ }),
+/* 75 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = exports.CodeToken = exports.CodeBlock = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _parchment = __webpack_require__(0);
+
+var _parchment2 = _interopRequireDefault(_parchment);
+
+var _quill = __webpack_require__(5);
+
+var _quill2 = _interopRequireDefault(_quill);
+
+var _module = __webpack_require__(9);
+
+var _module2 = _interopRequireDefault(_module);
+
+var _code = __webpack_require__(13);
+
+var _code2 = _interopRequireDefault(_code);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var SyntaxCodeBlock = function (_CodeBlock) {
+  _inherits(SyntaxCodeBlock, _CodeBlock);
+
+  function SyntaxCodeBlock() {
+    _classCallCheck(this, SyntaxCodeBlock);
+
+    return _possibleConstructorReturn(this, (SyntaxCodeBlock.__proto__ || Object.getPrototypeOf(SyntaxCodeBlock)).apply(this, arguments));
+  }
+
+  _createClass(SyntaxCodeBlock, [{
+    key: 'replaceWith',
+    value: function replaceWith(block) {
+      this.domNode.textContent = this.domNode.textContent;
+      this.attach();
+      _get(SyntaxCodeBlock.prototype.__proto__ || Object.getPrototypeOf(SyntaxCodeBlock.prototype), 'replaceWith', this).call(this, block);
+    }
+  }, {
+    key: 'highlight',
+    value: function highlight(_highlight) {
+      var text = this.domNode.textContent;
+      if (this.cachedText !== text) {
+        if (text.trim().length > 0 || this.cachedText == null) {
+          this.domNode.innerHTML = _highlight(text);
+          this.domNode.normalize();
+          this.attach();
+        }
+        this.cachedText = text;
+      }
+    }
+  }]);
+
+  return SyntaxCodeBlock;
+}(_code2.default);
+
+SyntaxCodeBlock.className = 'ql-syntax';
+
+var CodeToken = new _parchment2.default.Attributor.Class('token', 'hljs', {
+  scope: _parchment2.default.Scope.INLINE
+});
+
+var Syntax = function (_Module) {
+  _inherits(Syntax, _Module);
+
+  _createClass(Syntax, null, [{
+    key: 'register',
+    value: function register() {
+      _quill2.default.register(CodeToken, true);
+      _quill2.default.register(SyntaxCodeBlock, true);
+    }
+  }]);
+
+  function Syntax(quill, options) {
+    _classCallCheck(this, Syntax);
+
+    var _this2 = _possibleConstructorReturn(this, (Syntax.__proto__ || Object.getPrototypeOf(Syntax)).call(this, quill, options));
+
+    if (typeof _this2.options.highlight !== 'function') {
+      throw new Error('Syntax module requires highlight.js. Please include the library on the page before Quill.');
+    }
+    var timer = null;
+    _this2.quill.on(_quill2.default.events.SCROLL_OPTIMIZE, function () {
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        _this2.highlight();
+        timer = null;
+      }, _this2.options.interval);
+    });
+    _this2.highlight();
+    return _this2;
+  }
+
+  _createClass(Syntax, [{
+    key: 'highlight',
+    value: function highlight() {
+      var _this3 = this;
+
+      if (this.quill.selection.composing) return;
+      this.quill.update(_quill2.default.sources.USER);
+      var range = this.quill.getSelection();
+      this.quill.scroll.descendants(SyntaxCodeBlock).forEach(function (code) {
+        code.highlight(_this3.options.highlight);
+      });
+      this.quill.update(_quill2.default.sources.SILENT);
+      if (range != null) {
+        this.quill.setSelection(range, _quill2.default.sources.SILENT);
+      }
+    }
+  }]);
+
+  return Syntax;
+}(_module2.default);
+
+Syntax.DEFAULTS = {
+  highlight: function () {
+    if (window.hljs == null) return null;
+    return function (text) {
+      var result = window.hljs.highlightAuto(text);
+      return result.value;
+    };
+  }(),
+  interval: 1000
+};
+
+exports.CodeBlock = SyntaxCodeBlock;
+exports.CodeToken = CodeToken;
+exports.default = Syntax;
+
+/***/ }),
+/* 76 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <line class=ql-stroke x1=3 x2=15 y1=9 y2=9></line> <line class=ql-stroke x1=3 x2=13 y1=14 y2=14></line> <line class=ql-stroke x1=3 x2=9 y1=4 y2=4></line> </svg>";
+
+/***/ }),
+/* 77 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <line class=ql-stroke x1=15 x2=3 y1=9 y2=9></line> <line class=ql-stroke x1=14 x2=4 y1=14 y2=14></line> <line class=ql-stroke x1=12 x2=6 y1=4 y2=4></line> </svg>";
+
+/***/ }),
+/* 78 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <line class=ql-stroke x1=15 x2=3 y1=9 y2=9></line> <line class=ql-stroke x1=15 x2=5 y1=14 y2=14></line> <line class=ql-stroke x1=15 x2=9 y1=4 y2=4></line> </svg>";
+
+/***/ }),
+/* 79 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <line class=ql-stroke x1=15 x2=3 y1=9 y2=9></line> <line class=ql-stroke x1=15 x2=3 y1=14 y2=14></line> <line class=ql-stroke x1=15 x2=3 y1=4 y2=4></line> </svg>";
+
+/***/ }),
+/* 80 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <g class=\"ql-fill ql-color-label\"> <polygon points=\"6 6.868 6 6 5 6 5 7 5.942 7 6 6.868\"></polygon> <rect height=1 width=1 x=4 y=4></rect> <polygon points=\"6.817 5 6 5 6 6 6.38 6 6.817 5\"></polygon> <rect height=1 width=1 x=2 y=6></rect> <rect height=1 width=1 x=3 y=5></rect> <rect height=1 width=1 x=4 y=7></rect> <polygon points=\"4 11.439 4 11 3 11 3 12 3.755 12 4 11.439\"></polygon> <rect height=1 width=1 x=2 y=12></rect> <rect height=1 width=1 x=2 y=9></rect> <rect height=1 width=1 x=2 y=15></rect> <polygon points=\"4.63 10 4 10 4 11 4.192 11 4.63 10\"></polygon> <rect height=1 width=1 x=3 y=8></rect> <path d=M10.832,4.2L11,4.582V4H10.708A1.948,1.948,0,0,1,10.832,4.2Z></path> <path d=M7,4.582L7.168,4.2A1.929,1.929,0,0,1,7.292,4H7V4.582Z></path> <path d=M8,13H7.683l-0.351.8a1.933,1.933,0,0,1-.124.2H8V13Z></path> <rect height=1 width=1 x=12 y=2></rect> <rect height=1 width=1 x=11 y=3></rect> <path d=M9,3H8V3.282A1.985,1.985,0,0,1,9,3Z></path> <rect height=1 width=1 x=2 y=3></rect> <rect height=1 width=1 x=6 y=2></rect> <rect height=1 width=1 x=3 y=2></rect> <rect height=1 width=1 x=5 y=3></rect> <rect height=1 width=1 x=9 y=2></rect> <rect height=1 width=1 x=15 y=14></rect> <polygon points=\"13.447 10.174 13.469 10.225 13.472 10.232 13.808 11 14 11 14 10 13.37 10 13.447 10.174\"></polygon> <rect height=1 width=1 x=13 y=7></rect> <rect height=1 width=1 x=15 y=5></rect> <rect height=1 width=1 x=14 y=6></rect> <rect height=1 width=1 x=15 y=8></rect> <rect height=1 width=1 x=14 y=9></rect> <path d=M3.775,14H3v1H4V14.314A1.97,1.97,0,0,1,3.775,14Z></path> <rect height=1 width=1 x=14 y=3></rect> <polygon points=\"12 6.868 12 6 11.62 6 12 6.868\"></polygon> <rect height=1 width=1 x=15 y=2></rect> <rect height=1 width=1 x=12 y=5></rect> <rect height=1 width=1 x=13 y=4></rect> <polygon points=\"12.933 9 13 9 13 8 12.495 8 12.933 9\"></polygon> <rect height=1 width=1 x=9 y=14></rect> <rect height=1 width=1 x=8 y=15></rect> <path d=M6,14.926V15H7V14.316A1.993,1.993,0,0,1,6,14.926Z></path> <rect height=1 width=1 x=5 y=15></rect> <path d=M10.668,13.8L10.317,13H10v1h0.792A1.947,1.947,0,0,1,10.668,13.8Z></path> <rect height=1 width=1 x=11 y=15></rect> <path d=M14.332,12.2a1.99,1.99,0,0,1,.166.8H15V12H14.245Z></path> <rect height=1 width=1 x=14 y=15></rect> <rect height=1 width=1 x=15 y=11></rect> </g> <polyline class=ql-stroke points=\"5.5 13 9 5 12.5 13\"></polyline> <line class=ql-stroke x1=11.63 x2=6.38 y1=11 y2=11></line> </svg>";
+
+/***/ }),
+/* 81 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <rect class=\"ql-fill ql-stroke\" height=3 width=3 x=4 y=5></rect> <rect class=\"ql-fill ql-stroke\" height=3 width=3 x=11 y=5></rect> <path class=\"ql-even ql-fill ql-stroke\" d=M7,8c0,4.031-3,5-3,5></path> <path class=\"ql-even ql-fill ql-stroke\" d=M14,8c0,4.031-3,5-3,5></path> </svg>";
+
+/***/ }),
+/* 82 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <path class=ql-stroke d=M5,4H9.5A2.5,2.5,0,0,1,12,6.5v0A2.5,2.5,0,0,1,9.5,9H5A0,0,0,0,1,5,9V4A0,0,0,0,1,5,4Z></path> <path class=ql-stroke d=M5,9h5.5A2.5,2.5,0,0,1,13,11.5v0A2.5,2.5,0,0,1,10.5,14H5a0,0,0,0,1,0,0V9A0,0,0,0,1,5,9Z></path> </svg>";
+
+/***/ }),
+/* 83 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg class=\"\" viewbox=\"0 0 18 18\"> <line class=ql-stroke x1=5 x2=13 y1=3 y2=3></line> <line class=ql-stroke x1=6 x2=9.35 y1=12 y2=3></line> <line class=ql-stroke x1=11 x2=15 y1=11 y2=15></line> <line class=ql-stroke x1=15 x2=11 y1=11 y2=15></line> <rect class=ql-fill height=1 rx=0.5 ry=0.5 width=7 x=2 y=14></rect> </svg>";
+
+/***/ }),
+/* 84 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <line class=\"ql-color-label ql-stroke ql-transparent\" x1=3 x2=15 y1=15 y2=15></line> <polyline class=ql-stroke points=\"5.5 11 9 3 12.5 11\"></polyline> <line class=ql-stroke x1=11.63 x2=6.38 y1=9 y2=9></line> </svg>";
+
+/***/ }),
+/* 85 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <polygon class=\"ql-stroke ql-fill\" points=\"3 11 5 9 3 7 3 11\"></polygon> <line class=\"ql-stroke ql-fill\" x1=15 x2=11 y1=4 y2=4></line> <path class=ql-fill d=M11,3a3,3,0,0,0,0,6h1V3H11Z></path> <rect class=ql-fill height=11 width=1 x=11 y=4></rect> <rect class=ql-fill height=11 width=1 x=13 y=4></rect> </svg>";
+
+/***/ }),
+/* 86 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <polygon class=\"ql-stroke ql-fill\" points=\"15 12 13 10 15 8 15 12\"></polygon> <line class=\"ql-stroke ql-fill\" x1=9 x2=5 y1=4 y2=4></line> <path class=ql-fill d=M5,3A3,3,0,0,0,5,9H6V3H5Z></path> <rect class=ql-fill height=11 width=1 x=5 y=4></rect> <rect class=ql-fill height=11 width=1 x=7 y=4></rect> </svg>";
+
+/***/ }),
+/* 87 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <path class=ql-fill d=M14,16H4a1,1,0,0,1,0-2H14A1,1,0,0,1,14,16Z /> <path class=ql-fill d=M14,4H4A1,1,0,0,1,4,2H14A1,1,0,0,1,14,4Z /> <rect class=ql-fill x=3 y=6 width=12 height=6 rx=1 ry=1 /> </svg>";
+
+/***/ }),
+/* 88 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <path class=ql-fill d=M13,16H5a1,1,0,0,1,0-2h8A1,1,0,0,1,13,16Z /> <path class=ql-fill d=M13,4H5A1,1,0,0,1,5,2h8A1,1,0,0,1,13,4Z /> <rect class=ql-fill x=2 y=6 width=14 height=6 rx=1 ry=1 /> </svg>";
+
+/***/ }),
+/* 89 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <path class=ql-fill d=M15,8H13a1,1,0,0,1,0-2h2A1,1,0,0,1,15,8Z /> <path class=ql-fill d=M15,12H13a1,1,0,0,1,0-2h2A1,1,0,0,1,15,12Z /> <path class=ql-fill d=M15,16H5a1,1,0,0,1,0-2H15A1,1,0,0,1,15,16Z /> <path class=ql-fill d=M15,4H5A1,1,0,0,1,5,2H15A1,1,0,0,1,15,4Z /> <rect class=ql-fill x=2 y=6 width=8 height=6 rx=1 ry=1 /> </svg>";
+
+/***/ }),
+/* 90 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <path class=ql-fill d=M5,8H3A1,1,0,0,1,3,6H5A1,1,0,0,1,5,8Z /> <path class=ql-fill d=M5,12H3a1,1,0,0,1,0-2H5A1,1,0,0,1,5,12Z /> <path class=ql-fill d=M13,16H3a1,1,0,0,1,0-2H13A1,1,0,0,1,13,16Z /> <path class=ql-fill d=M13,4H3A1,1,0,0,1,3,2H13A1,1,0,0,1,13,4Z /> <rect class=ql-fill x=8 y=6 width=8 height=6 rx=1 ry=1 transform=\"translate(24 18) rotate(-180)\"/> </svg>";
+
+/***/ }),
+/* 91 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <path class=ql-fill d=M11.759,2.482a2.561,2.561,0,0,0-3.53.607A7.656,7.656,0,0,0,6.8,6.2C6.109,9.188,5.275,14.677,4.15,14.927a1.545,1.545,0,0,0-1.3-.933A0.922,0.922,0,0,0,2,15.036S1.954,16,4.119,16s3.091-2.691,3.7-5.553c0.177-.826.36-1.726,0.554-2.6L8.775,6.2c0.381-1.421.807-2.521,1.306-2.676a1.014,1.014,0,0,0,1.02.56A0.966,0.966,0,0,0,11.759,2.482Z></path> <rect class=ql-fill height=1.6 rx=0.8 ry=0.8 width=5 x=5.15 y=6.2></rect> <path class=ql-fill d=M13.663,12.027a1.662,1.662,0,0,1,.266-0.276q0.193,0.069.456,0.138a2.1,2.1,0,0,0,.535.069,1.075,1.075,0,0,0,.767-0.3,1.044,1.044,0,0,0,.314-0.8,0.84,0.84,0,0,0-.238-0.619,0.8,0.8,0,0,0-.594-0.239,1.154,1.154,0,0,0-.781.3,4.607,4.607,0,0,0-.781,1q-0.091.15-.218,0.346l-0.246.38c-0.068-.288-0.137-0.582-0.212-0.885-0.459-1.847-2.494-.984-2.941-0.8-0.482.2-.353,0.647-0.094,0.529a0.869,0.869,0,0,1,1.281.585c0.217,0.751.377,1.436,0.527,2.038a5.688,5.688,0,0,1-.362.467,2.69,2.69,0,0,1-.264.271q-0.221-.08-0.471-0.147a2.029,2.029,0,0,0-.522-0.066,1.079,1.079,0,0,0-.768.3A1.058,1.058,0,0,0,9,15.131a0.82,0.82,0,0,0,.832.852,1.134,1.134,0,0,0,.787-0.3,5.11,5.11,0,0,0,.776-0.993q0.141-.219.215-0.34c0.046-.076.122-0.194,0.223-0.346a2.786,2.786,0,0,0,.918,1.726,2.582,2.582,0,0,0,2.376-.185c0.317-.181.212-0.565,0-0.494A0.807,0.807,0,0,1,14.176,15a5.159,5.159,0,0,1-.913-2.446l0,0Q13.487,12.24,13.663,12.027Z></path> </svg>";
+
+/***/ }),
+/* 92 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewBox=\"0 0 18 18\"> <path class=ql-fill d=M10,4V14a1,1,0,0,1-2,0V10H3v4a1,1,0,0,1-2,0V4A1,1,0,0,1,3,4V8H8V4a1,1,0,0,1,2,0Zm6.06787,9.209H14.98975V7.59863a.54085.54085,0,0,0-.605-.60547h-.62744a1.01119,1.01119,0,0,0-.748.29688L11.645,8.56641a.5435.5435,0,0,0-.022.8584l.28613.30762a.53861.53861,0,0,0,.84717.0332l.09912-.08789a1.2137,1.2137,0,0,0,.2417-.35254h.02246s-.01123.30859-.01123.60547V13.209H12.041a.54085.54085,0,0,0-.605.60547v.43945a.54085.54085,0,0,0,.605.60547h4.02686a.54085.54085,0,0,0,.605-.60547v-.43945A.54085.54085,0,0,0,16.06787,13.209Z /> </svg>";
+
+/***/ }),
+/* 93 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewBox=\"0 0 18 18\"> <path class=ql-fill d=M16.73975,13.81445v.43945a.54085.54085,0,0,1-.605.60547H11.855a.58392.58392,0,0,1-.64893-.60547V14.0127c0-2.90527,3.39941-3.42187,3.39941-4.55469a.77675.77675,0,0,0-.84717-.78125,1.17684,1.17684,0,0,0-.83594.38477c-.2749.26367-.561.374-.85791.13184l-.4292-.34082c-.30811-.24219-.38525-.51758-.1543-.81445a2.97155,2.97155,0,0,1,2.45361-1.17676,2.45393,2.45393,0,0,1,2.68408,2.40918c0,2.45312-3.1792,2.92676-3.27832,3.93848h2.79443A.54085.54085,0,0,1,16.73975,13.81445ZM9,3A.99974.99974,0,0,0,8,4V8H3V4A1,1,0,0,0,1,4V14a1,1,0,0,0,2,0V10H8v4a1,1,0,0,0,2,0V4A.99974.99974,0,0,0,9,3Z /> </svg>";
+
+/***/ }),
+/* 94 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <line class=ql-stroke x1=7 x2=13 y1=4 y2=4></line> <line class=ql-stroke x1=5 x2=11 y1=14 y2=14></line> <line class=ql-stroke x1=8 x2=10 y1=14 y2=4></line> </svg>";
+
+/***/ }),
+/* 95 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <rect class=ql-stroke height=10 width=12 x=3 y=4></rect> <circle class=ql-fill cx=6 cy=7 r=1></circle> <polyline class=\"ql-even ql-fill\" points=\"5 12 5 11 7 9 8 10 11 7 13 9 13 12 5 12\"></polyline> </svg>";
+
+/***/ }),
+/* 96 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <line class=ql-stroke x1=3 x2=15 y1=14 y2=14></line> <line class=ql-stroke x1=3 x2=15 y1=4 y2=4></line> <line class=ql-stroke x1=9 x2=15 y1=9 y2=9></line> <polyline class=\"ql-fill ql-stroke\" points=\"3 7 3 11 5 9 3 7\"></polyline> </svg>";
+
+/***/ }),
+/* 97 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <line class=ql-stroke x1=3 x2=15 y1=14 y2=14></line> <line class=ql-stroke x1=3 x2=15 y1=4 y2=4></line> <line class=ql-stroke x1=9 x2=15 y1=9 y2=9></line> <polyline class=ql-stroke points=\"5 7 5 11 3 9 5 7\"></polyline> </svg>";
+
+/***/ }),
+/* 98 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <line class=ql-stroke x1=7 x2=11 y1=7 y2=11></line> <path class=\"ql-even ql-stroke\" d=M8.9,4.577a3.476,3.476,0,0,1,.36,4.679A3.476,3.476,0,0,1,4.577,8.9C3.185,7.5,2.035,6.4,4.217,4.217S7.5,3.185,8.9,4.577Z></path> <path class=\"ql-even ql-stroke\" d=M13.423,9.1a3.476,3.476,0,0,0-4.679-.36,3.476,3.476,0,0,0,.36,4.679c1.392,1.392,2.5,2.542,4.679.36S14.815,10.5,13.423,9.1Z></path> </svg>";
+
+/***/ }),
+/* 99 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <line class=ql-stroke x1=7 x2=15 y1=4 y2=4></line> <line class=ql-stroke x1=7 x2=15 y1=9 y2=9></line> <line class=ql-stroke x1=7 x2=15 y1=14 y2=14></line> <line class=\"ql-stroke ql-thin\" x1=2.5 x2=4.5 y1=5.5 y2=5.5></line> <path class=ql-fill d=M3.5,6A0.5,0.5,0,0,1,3,5.5V3.085l-0.276.138A0.5,0.5,0,0,1,2.053,3c-0.124-.247-0.023-0.324.224-0.447l1-.5A0.5,0.5,0,0,1,4,2.5v3A0.5,0.5,0,0,1,3.5,6Z></path> <path class=\"ql-stroke ql-thin\" d=M4.5,10.5h-2c0-.234,1.85-1.076,1.85-2.234A0.959,0.959,0,0,0,2.5,8.156></path> <path class=\"ql-stroke ql-thin\" d=M2.5,14.846a0.959,0.959,0,0,0,1.85-.109A0.7,0.7,0,0,0,3.75,14a0.688,0.688,0,0,0,.6-0.736,0.959,0.959,0,0,0-1.85-.109></path> </svg>";
+
+/***/ }),
+/* 100 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <line class=ql-stroke x1=6 x2=15 y1=4 y2=4></line> <line class=ql-stroke x1=6 x2=15 y1=9 y2=9></line> <line class=ql-stroke x1=6 x2=15 y1=14 y2=14></line> <line class=ql-stroke x1=3 x2=3 y1=4 y2=4></line> <line class=ql-stroke x1=3 x2=3 y1=9 y2=9></line> <line class=ql-stroke x1=3 x2=3 y1=14 y2=14></line> </svg>";
+
+/***/ }),
+/* 101 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg class=\"\" viewbox=\"0 0 18 18\"> <line class=ql-stroke x1=9 x2=15 y1=4 y2=4></line> <polyline class=ql-stroke points=\"3 4 4 5 6 3\"></polyline> <line class=ql-stroke x1=9 x2=15 y1=14 y2=14></line> <polyline class=ql-stroke points=\"3 14 4 15 6 13\"></polyline> <line class=ql-stroke x1=9 x2=15 y1=9 y2=9></line> <polyline class=ql-stroke points=\"3 9 4 10 6 8\"></polyline> </svg>";
+
+/***/ }),
+/* 102 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <path class=ql-fill d=M15.5,15H13.861a3.858,3.858,0,0,0,1.914-2.975,1.8,1.8,0,0,0-1.6-1.751A1.921,1.921,0,0,0,12.021,11.7a0.50013,0.50013,0,1,0,.957.291h0a0.914,0.914,0,0,1,1.053-.725,0.81,0.81,0,0,1,.744.762c0,1.076-1.16971,1.86982-1.93971,2.43082A1.45639,1.45639,0,0,0,12,15.5a0.5,0.5,0,0,0,.5.5h3A0.5,0.5,0,0,0,15.5,15Z /> <path class=ql-fill d=M9.65,5.241a1,1,0,0,0-1.409.108L6,7.964,3.759,5.349A1,1,0,0,0,2.192,6.59178Q2.21541,6.6213,2.241,6.649L4.684,9.5,2.241,12.35A1,1,0,0,0,3.71,13.70722q0.02557-.02768.049-0.05722L6,11.036,8.241,13.65a1,1,0,1,0,1.567-1.24277Q9.78459,12.3777,9.759,12.35L7.316,9.5,9.759,6.651A1,1,0,0,0,9.65,5.241Z /> </svg>";
+
+/***/ }),
+/* 103 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <path class=ql-fill d=M15.5,7H13.861a4.015,4.015,0,0,0,1.914-2.975,1.8,1.8,0,0,0-1.6-1.751A1.922,1.922,0,0,0,12.021,3.7a0.5,0.5,0,1,0,.957.291,0.917,0.917,0,0,1,1.053-.725,0.81,0.81,0,0,1,.744.762c0,1.077-1.164,1.925-1.934,2.486A1.423,1.423,0,0,0,12,7.5a0.5,0.5,0,0,0,.5.5h3A0.5,0.5,0,0,0,15.5,7Z /> <path class=ql-fill d=M9.651,5.241a1,1,0,0,0-1.41.108L6,7.964,3.759,5.349a1,1,0,1,0-1.519,1.3L4.683,9.5,2.241,12.35a1,1,0,1,0,1.519,1.3L6,11.036,8.241,13.65a1,1,0,0,0,1.519-1.3L7.317,9.5,9.759,6.651A1,1,0,0,0,9.651,5.241Z /> </svg>";
+
+/***/ }),
+/* 104 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <line class=\"ql-stroke ql-thin\" x1=15.5 x2=2.5 y1=8.5 y2=9.5></line> <path class=ql-fill d=M9.007,8C6.542,7.791,6,7.519,6,6.5,6,5.792,7.283,5,9,5c1.571,0,2.765.679,2.969,1.309a1,1,0,0,0,1.9-.617C13.356,4.106,11.354,3,9,3,6.2,3,4,4.538,4,6.5a3.2,3.2,0,0,0,.5,1.843Z></path> <path class=ql-fill d=M8.984,10C11.457,10.208,12,10.479,12,11.5c0,0.708-1.283,1.5-3,1.5-1.571,0-2.765-.679-2.969-1.309a1,1,0,1,0-1.9.617C4.644,13.894,6.646,15,9,15c2.8,0,5-1.538,5-3.5a3.2,3.2,0,0,0-.5-1.843Z></path> </svg>";
+
+/***/ }),
+/* 105 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <path class=ql-stroke d=M5,3V9a4.012,4.012,0,0,0,4,4H9a4.012,4.012,0,0,0,4-4V3></path> <rect class=ql-fill height=1 rx=0.5 ry=0.5 width=12 x=3 y=15></rect> </svg>";
+
+/***/ }),
+/* 106 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <rect class=ql-stroke height=12 width=12 x=3 y=3></rect> <rect class=ql-fill height=12 width=1 x=5 y=3></rect> <rect class=ql-fill height=12 width=1 x=12 y=3></rect> <rect class=ql-fill height=2 width=8 x=5 y=8></rect> <rect class=ql-fill height=1 width=3 x=3 y=5></rect> <rect class=ql-fill height=1 width=3 x=3 y=7></rect> <rect class=ql-fill height=1 width=3 x=3 y=10></rect> <rect class=ql-fill height=1 width=3 x=3 y=12></rect> <rect class=ql-fill height=1 width=3 x=12 y=5></rect> <rect class=ql-fill height=1 width=3 x=12 y=7></rect> <rect class=ql-fill height=1 width=3 x=12 y=10></rect> <rect class=ql-fill height=1 width=3 x=12 y=12></rect> </svg>";
+
+/***/ }),
+/* 107 */
+/***/ (function(module, exports) {
+
+module.exports = "<svg viewbox=\"0 0 18 18\"> <polygon class=ql-stroke points=\"7 11 9 13 11 11 7 11\"></polygon> <polygon class=ql-stroke points=\"7 7 9 5 11 7 7 7\"></polygon> </svg>";
+
+/***/ }),
+/* 108 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = exports.BubbleTooltip = undefined;
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _extend = __webpack_require__(3);
+
+var _extend2 = _interopRequireDefault(_extend);
+
+var _emitter = __webpack_require__(8);
+
+var _emitter2 = _interopRequireDefault(_emitter);
+
+var _base = __webpack_require__(43);
+
+var _base2 = _interopRequireDefault(_base);
+
+var _selection = __webpack_require__(15);
+
+var _icons = __webpack_require__(41);
+
+var _icons2 = _interopRequireDefault(_icons);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var TOOLBAR_CONFIG = [['bold', 'italic', 'link'], [{ header: 1 }, { header: 2 }, 'blockquote']];
+
+var BubbleTheme = function (_BaseTheme) {
+  _inherits(BubbleTheme, _BaseTheme);
+
+  function BubbleTheme(quill, options) {
+    _classCallCheck(this, BubbleTheme);
+
+    if (options.modules.toolbar != null && options.modules.toolbar.container == null) {
+      options.modules.toolbar.container = TOOLBAR_CONFIG;
+    }
+
+    var _this = _possibleConstructorReturn(this, (BubbleTheme.__proto__ || Object.getPrototypeOf(BubbleTheme)).call(this, quill, options));
+
+    _this.quill.container.classList.add('ql-bubble');
+    return _this;
+  }
+
+  _createClass(BubbleTheme, [{
+    key: 'extendToolbar',
+    value: function extendToolbar(toolbar) {
+      this.tooltip = new BubbleTooltip(this.quill, this.options.bounds);
+      this.tooltip.root.appendChild(toolbar.container);
+      this.buildButtons([].slice.call(toolbar.container.querySelectorAll('button')), _icons2.default);
+      this.buildPickers([].slice.call(toolbar.container.querySelectorAll('select')), _icons2.default);
+    }
+  }]);
+
+  return BubbleTheme;
+}(_base2.default);
+
+BubbleTheme.DEFAULTS = (0, _extend2.default)(true, {}, _base2.default.DEFAULTS, {
+  modules: {
+    toolbar: {
+      handlers: {
+        link: function link(value) {
+          if (!value) {
+            this.quill.format('link', false);
+          } else {
+            this.quill.theme.tooltip.edit();
+          }
+        }
+      }
+    }
+  }
+});
+
+var BubbleTooltip = function (_BaseTooltip) {
+  _inherits(BubbleTooltip, _BaseTooltip);
+
+  function BubbleTooltip(quill, bounds) {
+    _classCallCheck(this, BubbleTooltip);
+
+    var _this2 = _possibleConstructorReturn(this, (BubbleTooltip.__proto__ || Object.getPrototypeOf(BubbleTooltip)).call(this, quill, bounds));
+
+    _this2.quill.on(_emitter2.default.events.EDITOR_CHANGE, function (type, range, oldRange, source) {
+      if (type !== _emitter2.default.events.SELECTION_CHANGE) return;
+      if (range != null && range.length > 0 && source === _emitter2.default.sources.USER) {
+        _this2.show();
+        // Lock our width so we will expand beyond our offsetParent boundaries
+        _this2.root.style.left = '0px';
+        _this2.root.style.width = '';
+        _this2.root.style.width = _this2.root.offsetWidth + 'px';
+        var lines = _this2.quill.getLines(range.index, range.length);
+        if (lines.length === 1) {
+          _this2.position(_this2.quill.getBounds(range));
+        } else {
+          var lastLine = lines[lines.length - 1];
+          var index = _this2.quill.getIndex(lastLine);
+          var length = Math.min(lastLine.length() - 1, range.index + range.length - index);
+          var _bounds = _this2.quill.getBounds(new _selection.Range(index, length));
+          _this2.position(_bounds);
+        }
+      } else if (document.activeElement !== _this2.textbox && _this2.quill.hasFocus()) {
+        _this2.hide();
+      }
+    });
+    return _this2;
+  }
+
+  _createClass(BubbleTooltip, [{
+    key: 'listen',
+    value: function listen() {
+      var _this3 = this;
+
+      _get(BubbleTooltip.prototype.__proto__ || Object.getPrototypeOf(BubbleTooltip.prototype), 'listen', this).call(this);
+      this.root.querySelector('.ql-close').addEventListener('click', function () {
+        _this3.root.classList.remove('ql-editing');
+      });
+      this.quill.on(_emitter2.default.events.SCROLL_OPTIMIZE, function () {
+        // Let selection be restored by toolbar handlers before repositioning
+        setTimeout(function () {
+          if (_this3.root.classList.contains('ql-hidden')) return;
+          var range = _this3.quill.getSelection();
+          if (range != null) {
+            _this3.position(_this3.quill.getBounds(range));
+          }
+        }, 1);
+      });
+    }
+  }, {
+    key: 'cancel',
+    value: function cancel() {
+      this.show();
+    }
+  }, {
+    key: 'position',
+    value: function position(reference) {
+      var shift = _get(BubbleTooltip.prototype.__proto__ || Object.getPrototypeOf(BubbleTooltip.prototype), 'position', this).call(this, reference);
+      var arrow = this.root.querySelector('.ql-tooltip-arrow');
+      arrow.style.marginLeft = '';
+      if (shift === 0) return shift;
+      arrow.style.marginLeft = -1 * shift - arrow.offsetWidth / 2 + 'px';
+    }
+  }]);
+
+  return BubbleTooltip;
+}(_base.BaseTooltip);
+
+BubbleTooltip.TEMPLATE = ['<span class="ql-tooltip-arrow"></span>', '<div class="ql-tooltip-editor">', '<input type="text" data-formula="e=mc^2" data-link="https://quilljs.com" data-video="Embed URL">', '<a class="ql-close"></a>', '</div>'].join('');
+
+exports.BubbleTooltip = BubbleTooltip;
+exports.default = BubbleTheme;
+
+/***/ }),
+/* 109 */,
+/* 110 */,
+/* 111 */,
+/* 112 */,
+/* 113 */,
+/* 114 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _quill = __webpack_require__(63);
+
+var _quill2 = _interopRequireDefault(_quill);
+
+var _code = __webpack_require__(13);
+
+var _code2 = _interopRequireDefault(_code);
+
+__webpack_require__(115);
+
+__webpack_require__(116);
+
+__webpack_require__(117);
+
+__webpack_require__(118);
+
+__webpack_require__(119);
+
+__webpack_require__(120);
+
+__webpack_require__(121);
+
+__webpack_require__(122);
+
+__webpack_require__(123);
+
+__webpack_require__(124);
+
+__webpack_require__(125);
+
+__webpack_require__(126);
+
+__webpack_require__(127);
+
+__webpack_require__(128);
+
+__webpack_require__(129);
+
+__webpack_require__(130);
+
+__webpack_require__(131);
+
+__webpack_require__(132);
+
+__webpack_require__(133);
+
+__webpack_require__(134);
+
+__webpack_require__(135);
+
+__webpack_require__(136);
+
+__webpack_require__(137);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_quill2.default.register(_code2.default, true); // Syntax version will otherwise be registered
+
+exports.default = _quill2.default;
+
+/***/ }),
+/* 115 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+var _editor = __webpack_require__(14);
+
+var _editor2 = _interopRequireDefault(_editor);
+
+var _emitter = __webpack_require__(8);
+
+var _emitter2 = _interopRequireDefault(_emitter);
+
+var _selection = __webpack_require__(15);
+
+var _selection2 = _interopRequireDefault(_selection);
+
+var _scroll = __webpack_require__(22);
+
+var _scroll2 = _interopRequireDefault(_scroll);
+
+var _quill = __webpack_require__(5);
+
+var _quill2 = _interopRequireDefault(_quill);
+
+var _deepEqual = __webpack_require__(11);
+
+var _deepEqual2 = _interopRequireDefault(_deepEqual);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var div = document.createElement('div');
+div.id = 'test-container';
+document.body.appendChild(div);
+
+window.onerror = function (msg) {
+  return msg === 'Script error.';
+};
+
+beforeEach(function () {
+  jasmine.addMatchers({
+    toEqualHTML: function toEqualHTML() {
+      return { compare: compareHTML };
+    },
+    toBeApproximately: function toBeApproximately() {
+      return { compare: compareApproximately };
+    }
+  });
+
+  div.innerHTML = '<div></div>';
+  this.container = div.firstChild;
+  this.initialize = initialize.bind(this);
+});
+
+function compareApproximately(actual, expected, tolerance) {
+  var pass = Math.abs(actual - expected) <= tolerance;
+  return {
+    pass: pass,
+    message: actual + ' is ' + (pass ? '' : 'not') + ' approximately ' + expected
+  };
+}
+
+function compareHTML(actual, expected, ignoreClassId) {
+  var _map = [actual, expected].map(function (html) {
+    if (html instanceof HTMLElement) {
+      html = html.innerHTML;
+    }
+    var div = document.createElement('div');
+    div.innerHTML = html.replace(/\n\s*/g, '');
+    return div;
+  }),
+      _map2 = _slicedToArray(_map, 2),
+      div1 = _map2[0],
+      div2 = _map2[1];
+
+  var ignoredAttributes = ['width', 'height'];
+  if (ignoreClassId) {
+    ignoredAttributes = ignoredAttributes.concat(['class', 'id']);
+  }
+  var message = compareNodes(div1, div2, ignoredAttributes);
+  if (message != null) {
+    console.error(div1.innerHTML); // eslint-disable-line no-console
+    console.error(div2.innerHTML); // eslint-disable-line no-console
+    return { pass: false, message: message };
+  } else {
+    return { pass: true, message: 'HTMLs equal' };
+  }
+}
+
+function compareNodes(node1, node2) {
+  var ignoredAttributes = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
+  if (node1.nodeType !== node2.nodeType) {
+    return 'Expected nodeType \'' + node1.nodeType + '\' to equal \'' + node2.nodeType + '\'';
+  }
+  if (node1.nodeType === node1.ELEMENT_NODE) {
+    if (node1.tagName !== node2.tagName) {
+      return 'Expected tagName \'' + node1.tagName + '\' to equal \'' + node2.tagName + '\'';
+    }
+
+    var _map3 = [node1, node2].map(function (node) {
+      return [].reduce.call(node.attributes || {}, function (attr, elem) {
+        if (ignoredAttributes.indexOf(elem.name) < 0) {
+          attr[elem.name] = elem.name === 'style' ? elem.value.trim() : elem.value;
+        }
+        return attr;
+      }, {});
+    }),
+        _map4 = _slicedToArray(_map3, 2),
+        attr1 = _map4[0],
+        attr2 = _map4[1];
+
+    if (!(0, _deepEqual2.default)(attr1, attr2)) {
+      return 'Expected attributes ' + jasmine.pp(attr1) + ' to equal ' + jasmine.pp(attr2);
+    }
+    if (node1.childNodes.length !== node2.childNodes.length) {
+      return 'Expected node childNodes length \'' + node1.childNodes.length + '\' to equal \'' + node2.childNodes.length + '\'';
+    }
+    if (node1.childNodes.length === 0) return null;
+    var message = '';
+    if ([].some.call(node1.childNodes, function (child1, i) {
+      message = compareNodes(child1, node2.childNodes[i], ignoredAttributes);
+      return message;
+    })) {
+      return message;
+    }
+  } else if (node1.data !== node2.data) {
+    return 'Expected node text \'' + node1.data + '\' to equal \'' + node2.data + '\'';
+  }
+  return null;
+}
+
+function initialize(klass, html) {
+  var container = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this.container;
+
+  if ((typeof html === 'undefined' ? 'undefined' : _typeof(html)) === 'object') {
+    container.innerHTML = html.html;
+  } else {
+    container.innerHTML = html.replace(/\n\s*/g, '');
+  }
+  if (klass === HTMLElement) return container;
+  if (klass === _quill2.default) return new _quill2.default(container);
+  var emitter = new _emitter2.default();
+  var scroll = new _scroll2.default(container, { emitter: emitter });
+  if (klass === _scroll2.default) return scroll;
+  if (klass === _editor2.default) return new _editor2.default(scroll);
+  if (klass === _selection2.default) return new _selection2.default(scroll, emitter);
+  if (klass[0] === _editor2.default && klass[1] === _selection2.default) {
+    return [new _editor2.default(scroll), new _selection2.default(scroll, emitter)];
+  }
+}
+
+/***/ }),
+/* 116 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+var _parchment = __webpack_require__(0);
+
+var _parchment2 = _interopRequireDefault(_parchment);
+
+var _emitter = __webpack_require__(8);
+
+var _emitter2 = _interopRequireDefault(_emitter);
+
+var _selection = __webpack_require__(15);
+
+var _selection2 = _interopRequireDefault(_selection);
+
+var _cursor = __webpack_require__(24);
+
+var _cursor2 = _interopRequireDefault(_cursor);
+
+var _scroll = __webpack_require__(22);
+
+var _scroll2 = _interopRequireDefault(_scroll);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+describe('Scroll', function () {
+  it('initialize empty document', function () {
+    var scroll = this.initialize(_scroll2.default, '');
+    expect(scroll.domNode).toEqualHTML('<p><br></p>');
+  });
+
+  it('api change', function () {
+    var scroll = this.initialize(_scroll2.default, '<p>Hello World!</p>');
+    spyOn(scroll.emitter, 'emit').and.callThrough();
+    scroll.insertAt(5, '!');
+    expect(scroll.emitter.emit).toHaveBeenCalledWith(_emitter2.default.events.SCROLL_OPTIMIZE, jasmine.any(Array), jasmine.any(Object));
+  });
+
+  it('user change', function (done) {
+    var scroll = this.initialize(_scroll2.default, '<p>Hello World!</p>');
+    spyOn(scroll.emitter, 'emit').and.callThrough();
+    scroll.domNode.firstChild.appendChild(document.createTextNode('!'));
+    setTimeout(function () {
+      expect(scroll.emitter.emit).toHaveBeenCalledWith(_emitter2.default.events.SCROLL_OPTIMIZE, jasmine.any(Array), jasmine.any(Object));
+      expect(scroll.emitter.emit).toHaveBeenCalledWith(_emitter2.default.events.SCROLL_UPDATE, _emitter2.default.sources.USER, jasmine.any(Array));
+      done();
+    }, 1);
+  });
+
+  it('whitelist', function () {
+    var scroll = _parchment2.default.create('scroll', { emitter: new _emitter2.default(), whitelist: ['bold'] });
+    scroll.insertAt(0, 'Hello World!');
+    scroll.formatAt(0, 5, 'bold', true);
+    scroll.formatAt(6, 5, 'italic', true);
+    expect(scroll.domNode.firstChild).toEqualHTML('<strong>Hello</strong> World!');
+  });
+
+  describe('leaf()', function () {
+    it('text', function () {
+      var scroll = this.initialize(_scroll2.default, '<p>Tests</p>');
+
+      var _scroll$leaf = scroll.leaf(2),
+          _scroll$leaf2 = _slicedToArray(_scroll$leaf, 2),
+          leaf = _scroll$leaf2[0],
+          offset = _scroll$leaf2[1];
+
+      expect(leaf.value()).toEqual('Tests');
+      expect(offset).toEqual(2);
+    });
+
+    it('precise', function () {
+      var scroll = this.initialize(_scroll2.default, '<p><u>0</u><s>1</s><u>2</u><s>3</s><u>4</u></p>');
+
+      var _scroll$leaf3 = scroll.leaf(3),
+          _scroll$leaf4 = _slicedToArray(_scroll$leaf3, 2),
+          leaf = _scroll$leaf4[0],
+          offset = _scroll$leaf4[1];
+
+      expect(leaf.value()).toEqual('2');
+      expect(offset).toEqual(1);
+    });
+
+    it('newline', function () {
+      var scroll = this.initialize(_scroll2.default, '<p>0123</p><p>5678</p>');
+
+      var _scroll$leaf5 = scroll.leaf(4),
+          _scroll$leaf6 = _slicedToArray(_scroll$leaf5, 2),
+          leaf = _scroll$leaf6[0],
+          offset = _scroll$leaf6[1];
+
+      expect(leaf.value()).toEqual('0123');
+      expect(offset).toEqual(4);
+    });
+
+    it('cursor', function () {
+      var selection = this.initialize(_selection2.default, '<p><u>0</u>1<u>2</u></p>');
+      selection.setRange(new _selection.Range(2));
+      selection.format('strike', true);
+
+      var _selection$scroll$lea = selection.scroll.leaf(2),
+          _selection$scroll$lea2 = _slicedToArray(_selection$scroll$lea, 2),
+          leaf = _selection$scroll$lea2[0],
+          offset = _selection$scroll$lea2[1];
+
+      expect(leaf instanceof _cursor2.default).toBe(true);
+      expect(offset).toEqual(0);
+    });
+
+    it('beyond document', function () {
+      var scroll = this.initialize(_scroll2.default, '<p>Test</p>');
+
+      var _scroll$leaf7 = scroll.leaf(10),
+          _scroll$leaf8 = _slicedToArray(_scroll$leaf7, 2),
+          leaf = _scroll$leaf8[0],
+          offset = _scroll$leaf8[1];
+
+      expect(leaf).toEqual(null);
+      expect(offset).toEqual(-1);
+    });
+  });
+});
+
+/***/ }),
+/* 117 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _parchment = __webpack_require__(0);
+
+var _parchment2 = _interopRequireDefault(_parchment);
+
+var _scroll = __webpack_require__(22);
+
+var _scroll2 = _interopRequireDefault(_scroll);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+describe('Block', function () {
+  it('childless', function () {
+    var block = _parchment2.default.create('block');
+    block.optimize();
+    expect(block.domNode).toEqualHTML('<br>');
+  });
+
+  it('insert into empty', function () {
+    var block = _parchment2.default.create('block');
+    block.insertAt(0, 'Test');
+    expect(block.domNode).toEqualHTML('Test');
+  });
+
+  it('insert newlines', function () {
+    var scroll = this.initialize(_scroll2.default, '<p><br></p>');
+    scroll.insertAt(0, '\n\n\n');
+    expect(scroll.domNode).toEqualHTML('<p><br></p><p><br></p><p><br></p><p><br></p>');
+  });
+
+  it('insert multiline', function () {
+    var scroll = this.initialize(_scroll2.default, '<p>Hello World!</p>');
+    scroll.insertAt(6, 'pardon\nthis\n\ninterruption\n');
+    expect(scroll.domNode).toEqualHTML('\n      <p>Hello pardon</p>\n      <p>this</p>\n      <p><br></p>\n      <p>interruption</p>\n      <p>World!</p>\n    ');
+  });
+
+  it('insert into formatted', function () {
+    var scroll = this.initialize(_scroll2.default, '<h1>Welcome</h1>');
+    scroll.insertAt(3, 'l\n');
+    expect(scroll.domNode.firstChild.outerHTML).toEqualHTML('<h1>Well</h1>');
+    expect(scroll.domNode.childNodes[1].outerHTML).toEqualHTML('<h1>come</h1>');
+  });
+
+  it('delete line contents', function () {
+    var scroll = this.initialize(_scroll2.default, '<p>Hello</p><p>World!</p>');
+    scroll.deleteAt(0, 5);
+    expect(scroll.domNode).toEqualHTML('<p><br></p><p>World!</p>');
+  });
+
+  it('join lines', function () {
+    var scroll = this.initialize(_scroll2.default, '<h1>Hello</h1><h2>World!</h2>');
+    scroll.deleteAt(5, 1);
+    expect(scroll.domNode).toEqualHTML('<h2>HelloWorld!</h2>');
+  });
+
+  it('join line with empty', function () {
+    var scroll = this.initialize(_scroll2.default, '<p>Hello<strong>World</strong></p><p><br></p>');
+    scroll.deleteAt(10, 1);
+    expect(scroll.domNode).toEqualHTML('<p>Hello<strong>World</strong></p>');
+  });
+
+  it('join empty lines', function () {
+    var scroll = this.initialize(_scroll2.default, '<h1><br></h1><p><br></p>');
+    scroll.deleteAt(1, 1);
+    expect(scroll.domNode).toEqualHTML('<h1><br></h1>');
+  });
+
+  it('format empty', function () {
+    var scroll = this.initialize(_scroll2.default, '<p><br></p>');
+    scroll.formatAt(0, 1, 'header', 1);
+    expect(scroll.domNode).toEqualHTML('<h1><br></h1>');
+  });
+
+  it('format newline', function () {
+    var scroll = this.initialize(_scroll2.default, '<h1>Hello</h1>');
+    scroll.formatAt(5, 1, 'header', 2);
+    expect(scroll.domNode).toEqualHTML('<h2>Hello</h2>');
+  });
+
+  it('remove unnecessary break', function () {
+    var scroll = this.initialize(_scroll2.default, '<p>Test</p>');
+    scroll.children.head.domNode.appendChild(document.createElement('br'));
+    scroll.update();
+    expect(scroll.domNode).toEqualHTML('<p>Test</p>');
+  });
+});
+
+/***/ }),
+/* 118 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _scroll = __webpack_require__(22);
+
+var _scroll2 = _interopRequireDefault(_scroll);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+describe('Block Embed', function () {
+  it('insert', function () {
+    var scroll = this.initialize(_scroll2.default, '<p>0123</p>');
+    scroll.insertAt(2, 'video', '#');
+    expect(scroll.domNode).toEqualHTML('\n      <p>01</p>\n      <iframe src="#" class="ql-video" frameborder="0" allowfullscreen="true"></iframe>\n      <p>23</p>\n    ');
+  });
+
+  it('split newline', function () {
+    var scroll = this.initialize(_scroll2.default, '<p>0123</p>');
+    scroll.insertAt(4, 'video', '#');
+    expect(scroll.domNode).toEqualHTML('\n      <p>0123</p>\n      <iframe src="#" class="ql-video" frameborder="0" allowfullscreen="true"></iframe>\n      <p><br></p>\n    ');
+  });
+
+  it('insert end of document', function () {
+    var scroll = this.initialize(_scroll2.default, '<p>0123</p>');
+    scroll.insertAt(5, 'video', '#');
+    expect(scroll.domNode).toEqualHTML('\n      <p>0123</p>\n      <iframe src="#" class="ql-video" frameborder="0" allowfullscreen="true"></iframe>\n    ');
+  });
+
+  it('insert text before', function () {
+    var scroll = this.initialize(_scroll2.default, '<iframe src="#" class="ql-video" frameborder="0" allowfullscreen="true"></iframe>');
+    scroll.insertAt(0, 'Test');
+    expect(scroll.domNode).toEqualHTML('\n      <p>Test</p>\n      <iframe src="#" class="ql-video" frameborder="0" allowfullscreen="true"></iframe>\n    ');
+  });
+
+  it('insert text after', function () {
+    var scroll = this.initialize(_scroll2.default, '<iframe src="#" class="ql-video" frameborder="0" allowfullscreen="true"></iframe>');
+    scroll.insertAt(1, 'Test');
+    expect(scroll.domNode).toEqualHTML('\n      <iframe src="#" class="ql-video" frameborder="0" allowfullscreen="true"></iframe>\n      <p>Test</p>\n    ');
+  });
+
+  it('insert inline embed before', function () {
+    var scroll = this.initialize(_scroll2.default, '<iframe src="#" class="ql-video" frameborder="0" allowfullscreen="true"></iframe>');
+    scroll.insertAt(0, 'image', '/assets/favicon.png');
+    expect(scroll.domNode).toEqualHTML('\n      <p><img src="/assets/favicon.png"></p>\n      <iframe src="#" class="ql-video" frameborder="0" allowfullscreen="true"></iframe>\n    ');
+  });
+
+  it('insert inline embed after', function () {
+    var scroll = this.initialize(_scroll2.default, '<iframe src="#" class="ql-video" frameborder="0" allowfullscreen="true"></iframe>');
+    scroll.insertAt(1, 'image', '/assets/favicon.png');
+    expect(scroll.domNode).toEqualHTML('\n      <iframe src="#" class="ql-video" frameborder="0" allowfullscreen="true"></iframe>\n      <p><img src="/assets/favicon.png"></p>\n    ');
+  });
+
+  it('insert block embed before', function () {
+    var scroll = this.initialize(_scroll2.default, '<iframe src="#" class="ql-video" frameborder="0" allowfullscreen="true"></iframe>');
+    scroll.insertAt(0, 'video', '#1');
+    expect(scroll.domNode).toEqualHTML('\n      <iframe src="#1" class="ql-video" frameborder="0" allowfullscreen="true"></iframe>\n      <iframe src="#" class="ql-video" frameborder="0" allowfullscreen="true"></iframe>\n    ');
+  });
+
+  it('insert block embed after', function () {
+    var scroll = this.initialize(_scroll2.default, '<iframe src="#" class="ql-video" frameborder="0" allowfullscreen="true"></iframe>');
+    scroll.insertAt(1, 'video', '#1');
+    expect(scroll.domNode).toEqualHTML('\n      <iframe src="#" class="ql-video" frameborder="0" allowfullscreen="true"></iframe>\n      <iframe src="#1" class="ql-video" frameborder="0" allowfullscreen="true"></iframe>\n    ');
+  });
+
+  it('insert newline before', function () {
+    var scroll = this.initialize(_scroll2.default, '<iframe src="#" class="ql-video" frameborder="0" allowfullscreen="true"></iframe>');
+    scroll.insertAt(0, '\n');
+    scroll.optimize();
+    expect(scroll.domNode).toEqualHTML('\n      <p><br></p>\n      <iframe src="#" class="ql-video" frameborder="0" allowfullscreen="true"></iframe>\n    ');
+  });
+
+  it('insert newline after', function () {
+    var scroll = this.initialize(_scroll2.default, '<iframe src="#" class="ql-video" frameborder="0" allowfullscreen="true"></iframe>');
+    scroll.insertAt(1, '\n');
+    scroll.optimize();
+    expect(scroll.domNode).toEqualHTML('\n      <iframe src="#" class="ql-video" frameborder="0" allowfullscreen="true"></iframe>\n      <p><br></p>\n    ');
+  });
+
+  it('delete preceding newline', function () {
+    var scroll = this.initialize(_scroll2.default, '<p>0123</p><iframe src="#" class="ql-video" frameborder="0" allowfullscreen="true"></iframe>');
+    scroll.deleteAt(4, 1);
+    expect(scroll.domNode).toEqualHTML('\n      <p>0123</p>\n      <iframe src="#" class="ql-video" frameborder="0" allowfullscreen="true"></iframe>\n    ');
+  });
+});
+
+/***/ }),
+/* 119 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _scroll = __webpack_require__(22);
+
+var _scroll2 = _interopRequireDefault(_scroll);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+describe('Inline', function () {
+  it('format order', function () {
+    var scroll = this.initialize(_scroll2.default, '<p>Hello World!</p>');
+    scroll.formatAt(0, 1, 'bold', true);
+    scroll.formatAt(0, 1, 'italic', true);
+    scroll.formatAt(2, 1, 'italic', true);
+    scroll.formatAt(2, 1, 'bold', true);
+    expect(scroll.domNode).toEqualHTML('<p><strong><em>H</em></strong>e<strong><em>l</em></strong>lo World!</p>');
+  });
+
+  it('reorder', function () {
+    var scroll = this.initialize(_scroll2.default, '<p>0<strong>12</strong>3</p>');
+    var p = scroll.domNode.firstChild;
+    var em = document.createElement('em');
+    [].slice.call(p.childNodes).forEach(function (node) {
+      em.appendChild(node);
+    });
+    p.appendChild(em);
+    expect(scroll.domNode).toEqualHTML('<p><em>0<strong>12</strong>3</em></p>');
+    scroll.update();
+    expect(scroll.domNode).toEqualHTML('<p><em>0</em><strong><em>12</em></strong><em>3</em></p>');
+  });
+});
+
+/***/ }),
+/* 120 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+var _quillDelta = __webpack_require__(2);
+
+var _quillDelta2 = _interopRequireDefault(_quillDelta);
+
+var _editor = __webpack_require__(14);
+
+var _editor2 = _interopRequireDefault(_editor);
+
+var _selection = __webpack_require__(15);
+
+var _selection2 = _interopRequireDefault(_selection);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+describe('Editor', function () {
+  describe('insert', function () {
+    it('text', function () {
+      var editor = this.initialize(_editor2.default, '<p><strong>0123</strong></p>');
+      editor.insertText(2, '!!');
+      expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('01!!23', { bold: true }).insert('\n'));
+      expect(this.container).toEqualHTML('<p><strong>01!!23</strong></p>');
+    });
+
+    it('embed', function () {
+      var editor = this.initialize(_editor2.default, '<p><strong>0123</strong></p>');
+      editor.insertEmbed(2, 'image', '/assets/favicon.png');
+      expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('01', { bold: true }).insert({ image: '/assets/favicon.png' }, { bold: true }).insert('23', { bold: true }).insert('\n'));
+      expect(this.container).toEqualHTML('<p><strong>01<img src="/assets/favicon.png">23</strong></p>');
+    });
+
+    it('on empty line', function () {
+      var editor = this.initialize(_editor2.default, '<p>0</p><p><br></p><p>3</p>');
+      editor.insertText(2, '!');
+      expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0\n!\n3\n'));
+      expect(this.container).toEqualHTML('<p>0</p><p>!</p><p>3</p>');
+    });
+
+    it('end of document', function () {
+      var editor = this.initialize(_editor2.default, '<p>Hello</p>');
+      editor.insertText(6, 'World!');
+      expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('Hello\nWorld!\n'));
+      expect(this.container).toEqualHTML('<p>Hello</p><p>World!</p>');
+    });
+
+    it('end of document with newline', function () {
+      var editor = this.initialize(_editor2.default, '<p>Hello</p>');
+      editor.insertText(6, 'World!\n');
+      expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('Hello\nWorld!\n'));
+      expect(this.container).toEqualHTML('<p>Hello</p><p>World!</p>');
+    });
+
+    it('embed at end of document with newline', function () {
+      var editor = this.initialize(_editor2.default, '<p>Hello</p>');
+      editor.insertEmbed(6, 'image', '/assets/favicon.png');
+      expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('Hello\n').insert({ image: '/assets/favicon.png' }).insert('\n'));
+      expect(this.container).toEqualHTML('<p>Hello</p><p><img src="/assets/favicon.png"></p>');
+    });
+
+    it('newline splitting', function () {
+      var editor = this.initialize(_editor2.default, '<p><strong>0123</strong></p>');
+      editor.insertText(2, '\n');
+      expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('01', { bold: true }).insert('\n').insert('23', { bold: true }).insert('\n'));
+      expect(this.container).toEqualHTML('\n        <p><strong>01</strong></p>\n        <p><strong>23</strong></p>');
+    });
+
+    it('prepend newline', function () {
+      var editor = this.initialize(_editor2.default, '<p><strong>0123</strong></p>');
+      editor.insertText(0, '\n');
+      expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('\n').insert('0123', { bold: true }).insert('\n'));
+      expect(this.container).toEqualHTML('\n        <p><br></p>\n        <p><strong>0123</strong></p>');
+    });
+
+    it('append newline', function () {
+      var editor = this.initialize(_editor2.default, '<p><strong>0123</strong></p>');
+      editor.insertText(4, '\n');
+      expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123', { bold: true }).insert('\n\n'));
+      expect(this.container).toEqualHTML('\n        <p><strong>0123</strong></p>\n        <p><br></p>');
+    });
+
+    it('multiline text', function () {
+      var editor = this.initialize(_editor2.default, '<p><strong>0123</strong></p>');
+      editor.insertText(2, '\n!!\n!!\n');
+      expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('01', { bold: true }).insert('\n').insert('!!', { bold: true }).insert('\n').insert('!!', { bold: true }).insert('\n').insert('23', { bold: true }).insert('\n'));
+      expect(this.container).toEqualHTML('\n        <p><strong>01</strong></p>\n        <p><strong>!!</strong></p>\n        <p><strong>!!</strong></p>\n        <p><strong>23</strong></p>');
+    });
+
+    it('multiple newlines', function () {
+      var editor = this.initialize(_editor2.default, '<p><strong>0123</strong></p>');
+      editor.insertText(2, '\n\n');
+      expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('01', { bold: true }).insert('\n\n').insert('23', { bold: true }).insert('\n'));
+      expect(this.container).toEqualHTML('\n        <p><strong>01</strong></p>\n        <p><br></p>\n        <p><strong>23</strong></p>');
+    });
+
+    it('text removing formatting', function () {
+      var editor = this.initialize(_editor2.default, '<p><s>01</s></p>');
+      editor.insertText(2, '23', { bold: false, strike: false });
+      expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('01', { strike: true }).insert('23\n'));
+    });
+  });
+
+  describe('delete', function () {
+    it('inner node', function () {
+      var editor = this.initialize(_editor2.default, '<p><strong><em>0123</em></strong></p>');
+      editor.deleteText(1, 2);
+      expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('03', { bold: true, italic: true }).insert('\n'));
+      expect(this.container).toEqualHTML('<p><strong><em>03</em></strong></p>');
+    });
+
+    it('parts of multiple lines', function () {
+      var editor = this.initialize(_editor2.default, '<p><em>0123</em></p><p><em>5678</em></p>');
+      editor.deleteText(2, 5);
+      expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0178', { italic: true }).insert('\n'));
+      expect(this.container).toEqualHTML('<p><em>0178</em></p>');
+    });
+
+    it('entire line keeping newline', function () {
+      var editor = this.initialize(_editor2.default, '<p><strong><em>0123</em></strong></p>');
+      editor.deleteText(0, 4);
+      expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('\n'));
+      expect(this.container).toEqualHTML('<p><br></p>');
+    });
+
+    it('newline', function () {
+      var editor = this.initialize(_editor2.default, '<p><em>0123</em></p><p><em>5678</em></p>');
+      editor.deleteText(4, 1);
+      expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('01235678', { italic: true }).insert('\n'));
+      expect(this.container).toEqualHTML('<p><em>01235678</em></p>');
+    });
+
+    it('entire document', function () {
+      var editor = this.initialize(_editor2.default, '<p><strong><em>0123</em></strong></p>');
+      editor.deleteText(0, 5);
+      expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('\n'));
+      expect(this.container).toEqualHTML('<p><br></p>');
+    });
+
+    it('multiple complete lines', function () {
+      var editor = this.initialize(_editor2.default, '<p><em>012</em></p><p><em>456</em></p><p><em>890</em></p>');
+      editor.deleteText(0, 8);
+      expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('890', { italic: true }).insert('\n'));
+      expect(this.container).toEqualHTML('<p><em>890</em></p>');
+    });
+  });
+
+  describe('format', function () {
+    it('line', function () {
+      var editor = this.initialize(_editor2.default, '<p>0123</p>');
+      editor.formatLine(1, 1, { header: 1 });
+      expect(editor.scroll.domNode).toEqualHTML('<h1>0123</h1>');
+    });
+  });
+
+  describe('removeFormat', function () {
+    it('unwrap', function () {
+      var editor = this.initialize(_editor2.default, '<p>0<em>12</em>3</p>');
+      editor.removeFormat(1, 2);
+      expect(this.container).toEqualHTML('<p>0123</p>');
+    });
+
+    it('split inline', function () {
+      var editor = this.initialize(_editor2.default, '<p>0<strong><em>12</em></strong>3</p>');
+      editor.removeFormat(1, 1);
+      expect(this.container).toEqualHTML('<p>01<strong><em>2</em></strong>3</p>');
+    });
+
+    it('partial line', function () {
+      var editor = this.initialize(_editor2.default, '<ul><li>01</li></ul><ol><li>34</li></ol>');
+      editor.removeFormat(1, 3);
+      expect(this.container).toEqualHTML('<p>01</p><p>34</p>');
+    });
+
+    it('remove embed', function () {
+      var editor = this.initialize(_editor2.default, '<p>0<img src="/assets/favicon.png">2</p>');
+      editor.removeFormat(1, 1);
+      expect(this.container).toEqualHTML('<p>02</p>');
+    });
+
+    it('combined', function () {
+      var editor = this.initialize(_editor2.default, '\n        <ul>\n          <li>01<img src="/assets/favicon.png">3</li>\n        </ul>\n        <ol>\n          <li>5<strong>6<em>78</em>9</strong>0</li>\n        </ol>\n      ');
+      editor.removeFormat(1, 7);
+      expect(this.container).toEqualHTML('\n        <p>013</p>\n        <p>567<strong><em>8</em>9</strong>0</p>\n      ');
+    });
+
+    it('end of document', function () {
+      var editor = this.initialize(_editor2.default, '\n        <ul>\n          <li>0123</li>\n          <li>5678</li>\n        </ol>\n      ');
+      editor.removeFormat(0, 12);
+      expect(this.container).toEqualHTML('\n        <p>0123</p>\n        <p>5678</p>\n      ');
+    });
+  });
+
+  describe('applyDelta', function () {
+    it('insert', function () {
+      var editor = this.initialize(_editor2.default, '<p></p>');
+      editor.applyDelta(new _quillDelta2.default().insert('01'));
+      expect(this.container).toEqualHTML('<p>01</p>');
+    });
+
+    it('attributed insert', function () {
+      var editor = this.initialize(_editor2.default, '<p>0123</p>');
+      editor.applyDelta(new _quillDelta2.default().retain(2).insert('|', { bold: true }));
+      expect(this.container).toEqualHTML('<p>01<strong>|</strong>23</p>');
+    });
+
+    it('format', function () {
+      var editor = this.initialize(_editor2.default, '<p>01</p>');
+      editor.applyDelta(new _quillDelta2.default().retain(2, { bold: true }));
+      expect(this.container).toEqualHTML('<p><strong>01</strong></p>');
+    });
+
+    it('discontinuous formats', function () {
+      var editor = this.initialize(_editor2.default, '');
+      var delta = new _quillDelta2.default().insert('ab', { bold: true }).insert('23\n45').insert('cd', { bold: true });
+      editor.applyDelta(delta);
+      expect(this.container).toEqualHTML('<p><strong>ab</strong>23</p><p>45<strong>cd</strong></p>');
+    });
+
+    it('unformatted insert', function () {
+      var editor = this.initialize(_editor2.default, '<p><em>01</em></p>');
+      editor.applyDelta(new _quillDelta2.default().retain(1).insert('|'));
+      expect(this.container).toEqualHTML('<p><em>0</em>|<em>1</em></p>');
+    });
+
+    it('insert at format boundary', function () {
+      var editor = this.initialize(_editor2.default, '<p><em>0</em><u>1</u></p>');
+      editor.applyDelta(new _quillDelta2.default().retain(1).insert('|', { strike: true }));
+      expect(this.container).toEqualHTML('<p><em>0</em><s>|</s><u>1</u></p>');
+    });
+
+    it('unformatted newline', function () {
+      var editor = this.initialize(_editor2.default, '<h1>01</h1>');
+      editor.applyDelta(new _quillDelta2.default().retain(2).insert('\n'));
+      expect(this.container).toEqualHTML('<p>01</p><h1><br></h1>');
+    });
+
+    it('formatted embed', function () {
+      var editor = this.initialize(_editor2.default, '');
+      editor.applyDelta(new _quillDelta2.default().insert({ image: '/assets/favicon.png' }, { italic: true }));
+      expect(this.container).toEqualHTML('<p><em><img src="/assets/favicon.png"></em>');
+    });
+
+    it('old embed', function () {
+      var editor = this.initialize(_editor2.default, '');
+      editor.applyDelta(new _quillDelta2.default().insert(1, { image: '/assets/favicon.png', italic: true }));
+      expect(this.container).toEqualHTML('<p><em><img src="/assets/favicon.png"></em>');
+    });
+
+    it('old list', function () {
+      var editor = this.initialize(_editor2.default, '');
+      editor.applyDelta(new _quillDelta2.default().insert('\n', { bullet: true }).insert('\n', { list: true }));
+      expect(this.container).toEqualHTML('<ul><li><br></li></ul><ol><li><br></li></ol><p><br></p>');
+    });
+
+    it('improper block embed insert', function () {
+      var editor = this.initialize(_editor2.default, '<p>0123</p>');
+      editor.applyDelta(new _quillDelta2.default().retain(2).insert({ video: '#' }));
+      expect(this.container).toEqualHTML('<p>01</p><iframe src="#" class="ql-video" frameborder="0" allowfullscreen="true"></iframe><p>23</p>');
+    });
+
+    it('append formatted block embed', function () {
+      var editor = this.initialize(_editor2.default, '<p>0123</p><p><br></p>');
+      editor.applyDelta(new _quillDelta2.default().retain(5).insert({ video: '#' }, { align: 'right' }));
+      expect(this.container).toEqualHTML('<p>0123</p><iframe src="#" class="ql-video ql-align-right" frameborder="0" allowfullscreen="true"></iframe><p><br></p>');
+    });
+
+    it('append', function () {
+      var editor = this.initialize(_editor2.default, '<p>0123</p>');
+      editor.applyDelta(new _quillDelta2.default().retain(5).insert('5678'));
+      expect(this.container).toEqualHTML('<p>0123</p><p>5678</p>');
+    });
+
+    it('append newline', function () {
+      var editor = this.initialize(_editor2.default, '<p>0123</p>');
+      editor.applyDelta(new _quillDelta2.default().retain(5).insert('\n', { header: 2 }));
+      expect(this.container).toEqualHTML('<p>0123</p><h2><br></h2>');
+    });
+
+    it('append text with newline', function () {
+      var editor = this.initialize(_editor2.default, '<p>0123</p>');
+      editor.applyDelta(new _quillDelta2.default().retain(5).insert('5678').insert('\n', { header: 2 }));
+      expect(this.container).toEqualHTML('<p>0123</p><h2>5678</h2>');
+    });
+
+    it('append non-isolated newline', function () {
+      var editor = this.initialize(_editor2.default, '<p>0123</p>');
+      editor.applyDelta(new _quillDelta2.default().retain(5).insert('5678\n', { header: 2 }));
+      expect(this.container).toEqualHTML('<p>0123</p><h2>5678</h2>');
+    });
+
+    it('eventual append', function () {
+      var editor = this.initialize(_editor2.default, '<p>0123</p>');
+      editor.applyDelta(new _quillDelta2.default().retain(2).insert('ab\n', { header: 1 }).retain(3).insert('cd\n', { header: 2 }));
+      expect(this.container).toEqualHTML('<h1>01ab</h1><p>23</p><h2>cd</h2>');
+    });
+
+    it('append text, embed and newline', function () {
+      var editor = this.initialize(_editor2.default, '<p>0123</p>');
+      editor.applyDelta(new _quillDelta2.default().retain(5).insert('5678').insert({ image: '/assets/favicon.png' }).insert('\n', { header: 2 }));
+      expect(this.container).toEqualHTML('<p>0123</p><h2>5678<img src="/assets/favicon.png"></h2>');
+    });
+
+    it('append multiple lines', function () {
+      var editor = this.initialize(_editor2.default, '<p>0123</p>');
+      editor.applyDelta(new _quillDelta2.default().retain(5).insert('56').insert('\n', { header: 1 }).insert('89').insert('\n', { header: 2 }));
+      expect(this.container).toEqualHTML('<p>0123</p><h1>56</h1><h2>89</h2>');
+    });
+
+    it('code', function () {
+      var editor = this.initialize(_editor2.default, { html: '<p>0</p><pre>1\n23\n</pre><p><br></p>' });
+      editor.applyDelta(new _quillDelta2.default().delete(4).retain(1).delete(2));
+      expect(editor.scroll.domNode.innerHTML).toEqual('<p>2</p>');
+    });
+  });
+
+  describe('getFormat()', function () {
+    it('unformatted', function () {
+      var editor = this.initialize(_editor2.default, '<p>0123</p>');
+      expect(editor.getFormat(1)).toEqual({});
+    });
+
+    it('formatted', function () {
+      var editor = this.initialize(_editor2.default, '<h1><em>0123</em></h1>');
+      expect(editor.getFormat(1)).toEqual({ header: 1, italic: true });
+    });
+
+    it('cursor', function () {
+      var editor = this.initialize(_editor2.default, '<h1><strong><em>0123</em></strong></h1><h2><u>5678</u></h2>');
+      expect(editor.getFormat(2)).toEqual({ bold: true, italic: true, header: 1 });
+    });
+
+    it('cursor with preformat', function () {
+      var _initialize = this.initialize([_editor2.default, _selection2.default], '<h1><strong><em>0123</em></strong></h1>'),
+          _initialize2 = _slicedToArray(_initialize, 2),
+          editor = _initialize2[0],
+          selection = _initialize2[1];
+
+      selection.setRange(new _selection.Range(2));
+      selection.format('underline', true);
+      selection.format('color', 'red');
+      expect(editor.getFormat(2)).toEqual({ bold: true, italic: true, header: 1, color: 'red', underline: true });
+    });
+
+    it('across leaves', function () {
+      var editor = this.initialize(_editor2.default, '\n        <h1>\n          <strong class="ql-size-small"><em>01</em></strong>\n          <em class="ql-size-large"><u>23</u></em>\n          <em class="ql-size-huge"><u>45</u></em>\n        </h1>\n      ');
+      expect(editor.getFormat(1, 4)).toEqual({ italic: true, header: 1, size: ['small', 'large', 'huge'] });
+    });
+
+    it('across lines', function () {
+      var editor = this.initialize(_editor2.default, '\n        <h1 class="ql-align-right"><em>01</em></h1>\n        <h1 class="ql-align-center"><em>34</em></h1>\n      ');
+      expect(editor.getFormat(1, 3)).toEqual({ italic: true, header: 1, align: ['right', 'center'] });
+    });
+  });
+});
+
+/***/ }),
+/* 121 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+var _selection = __webpack_require__(15);
+
+var _selection2 = _interopRequireDefault(_selection);
+
+var _cursor = __webpack_require__(24);
+
+var _cursor2 = _interopRequireDefault(_cursor);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+describe('Selection', function () {
+  beforeEach(function () {
+    var _this = this;
+
+    this.setup = function (html, index) {
+      _this.selection = _this.initialize(_selection2.default, html);
+      _this.selection.setRange(new _selection.Range(index));
+    };
+  });
+
+  describe('focus()', function () {
+    beforeEach(function () {
+      this.initialize(HTMLElement, '<textarea>Test</textarea><div></div>');
+      this.selection = this.initialize(_selection2.default, '<p>0123</p>', this.container.lastChild);
+      this.textarea = this.container.querySelector('textarea');
+      this.textarea.focus();
+      this.textarea.select();
+    });
+
+    it('initial focus', function () {
+      expect(this.selection.hasFocus()).toBe(false);
+      this.selection.focus();
+      expect(this.selection.hasFocus()).toBe(true);
+    });
+
+    it('restore last range', function () {
+      var range = new _selection.Range(1, 2);
+      this.selection.setRange(range);
+      this.textarea.focus();
+      this.textarea.select();
+      expect(this.selection.hasFocus()).toBe(false);
+      this.selection.focus();
+      expect(this.selection.hasFocus()).toBe(true);
+      expect(this.selection.getRange()[0]).toEqual(range);
+    });
+  });
+
+  describe('getRange()', function () {
+    it('empty document', function () {
+      var selection = this.initialize(_selection2.default, '');
+      selection.setNativeRange(this.container.querySelector('br'), 0);
+
+      var _selection$getRange = selection.getRange(),
+          _selection$getRange2 = _slicedToArray(_selection$getRange, 1),
+          range = _selection$getRange2[0];
+
+      expect(range.index).toEqual(0);
+      expect(range.length).toEqual(0);
+    });
+
+    it('empty line', function () {
+      var selection = this.initialize(_selection2.default, '<p>0</p><p><br></p><p>3</p>');
+      selection.setNativeRange(this.container.querySelector('br'), 0);
+
+      var _selection$getRange3 = selection.getRange(),
+          _selection$getRange4 = _slicedToArray(_selection$getRange3, 1),
+          range = _selection$getRange4[0];
+
+      expect(range.index).toEqual(2);
+      expect(range.length).toEqual(0);
+    });
+
+    it('end of line', function () {
+      var selection = this.initialize(_selection2.default, '<p>0</p>');
+      selection.setNativeRange(this.container.firstChild.firstChild, 1);
+
+      var _selection$getRange5 = selection.getRange(),
+          _selection$getRange6 = _slicedToArray(_selection$getRange5, 1),
+          range = _selection$getRange6[0];
+
+      expect(range.index).toEqual(1);
+      expect(range.length).toEqual(0);
+    });
+
+    it('text node', function () {
+      var selection = this.initialize(_selection2.default, '<p>0123</p>');
+      selection.setNativeRange(this.container.firstChild.firstChild, 1);
+
+      var _selection$getRange7 = selection.getRange(),
+          _selection$getRange8 = _slicedToArray(_selection$getRange7, 1),
+          range = _selection$getRange8[0];
+
+      expect(range.index).toEqual(1);
+      expect(range.length).toEqual(0);
+    });
+
+    it('line boundaries', function () {
+      var selection = this.initialize(_selection2.default, '<p><br></p><p>12</p>');
+      selection.setNativeRange(this.container.firstChild, 0, this.container.lastChild.lastChild, 2);
+
+      var _selection$getRange9 = selection.getRange(),
+          _selection$getRange10 = _slicedToArray(_selection$getRange9, 1),
+          range = _selection$getRange10[0];
+
+      expect(range.index).toEqual(0);
+      expect(range.length).toEqual(3);
+    });
+
+    it('nested text node', function () {
+      var selection = this.initialize(_selection2.default, '\n        <p><strong><em>01</em></strong></p>\n        <ul>\n          <li><em><u>34</u></em></li>\n        </ul>');
+      selection.setNativeRange(this.container.querySelector('em').firstChild, 1, this.container.querySelector('u').firstChild, 1);
+
+      var _selection$getRange11 = selection.getRange(),
+          _selection$getRange12 = _slicedToArray(_selection$getRange11, 1),
+          range = _selection$getRange12[0];
+
+      expect(range.index).toEqual(1);
+      expect(range.length).toEqual(3);
+    });
+
+    it('between embed', function () {
+      var selection = this.initialize(_selection2.default, '\n        <p>\n          <img src="/assets/favicon.png">\n          <img src="/assets/favicon.png">\n        </p>\n        <ul>\n          <li>\n            <img src="/assets/favicon.png">\n            <img src="/assets/favicon.png">\n          </li>\n        </ul>');
+      selection.setNativeRange(this.container.firstChild, 1, this.container.lastChild.lastChild, 1);
+
+      var _selection$getRange13 = selection.getRange(),
+          _selection$getRange14 = _slicedToArray(_selection$getRange13, 1),
+          range = _selection$getRange14[0];
+
+      expect(range.index).toEqual(1);
+      expect(range.length).toEqual(3);
+    });
+
+    it('between inlines', function () {
+      var selection = this.initialize(_selection2.default, '<p><em>01</em><s>23</s><u>45</u></p>');
+      selection.setNativeRange(this.container.firstChild, 1, this.container.firstChild, 2);
+
+      var _selection$getRange15 = selection.getRange(),
+          _selection$getRange16 = _slicedToArray(_selection$getRange15, 1),
+          range = _selection$getRange16[0];
+
+      expect(range.index).toEqual(2);
+      expect(range.length).toEqual(2);
+    });
+
+    it('between blocks', function () {
+      var selection = this.initialize(_selection2.default, '\n        <p>01</p>\n        <p><br></p>\n        <ul>\n          <li>45</li>\n          <li>78</li>\n        </ul>');
+      selection.setNativeRange(this.container, 1, this.container.lastChild, 1);
+
+      var _selection$getRange17 = selection.getRange(),
+          _selection$getRange18 = _slicedToArray(_selection$getRange17, 1),
+          range = _selection$getRange18[0];
+
+      expect(range.index).toEqual(3);
+      expect(range.length).toEqual(4);
+    });
+
+    it('wrong input', function () {
+      var container = this.initialize(HTMLElement, '\n        <textarea>Test</textarea>\n        <div></div>');
+      var selection = this.initialize(_selection2.default, '<p>0123</p>', container.lastChild);
+      container.firstChild.select();
+
+      var _selection$getRange19 = selection.getRange(),
+          _selection$getRange20 = _slicedToArray(_selection$getRange19, 1),
+          range = _selection$getRange20[0];
+
+      expect(range).toEqual(null);
+    });
+  });
+
+  describe('setRange()', function () {
+    it('empty document', function () {
+      var selection = this.initialize(_selection2.default, '');
+      var expected = new _selection.Range(0);
+      selection.setRange(expected);
+
+      var _selection$getRange21 = selection.getRange(),
+          _selection$getRange22 = _slicedToArray(_selection$getRange21, 1),
+          range = _selection$getRange22[0];
+
+      expect(range).toEqual(expected);
+      expect(selection.hasFocus()).toBe(true);
+    });
+
+    it('empty lines', function () {
+      var selection = this.initialize(_selection2.default, '\n        <p><br></p>\n        <ul>\n          <li><br></li>\n        </ul>');
+      var expected = new _selection.Range(0, 1);
+      selection.setRange(expected);
+
+      var _selection$getRange23 = selection.getRange(),
+          _selection$getRange24 = _slicedToArray(_selection$getRange23, 1),
+          range = _selection$getRange24[0];
+
+      expect(range).toEqual(range);
+      expect(selection.hasFocus()).toBe(true);
+    });
+
+    it('nested text node', function () {
+      var selection = this.initialize(_selection2.default, '\n        <p><strong><em>01</em></strong></p>\n        <ul>\n          <li><em><u>34</u></em></li>\n        </ul>');
+      var expected = new _selection.Range(1, 3);
+      selection.setRange(expected);
+
+      var _selection$getRange25 = selection.getRange(),
+          _selection$getRange26 = _slicedToArray(_selection$getRange25, 1),
+          range = _selection$getRange26[0];
+
+      expect(range).toEqual(expected);
+      expect(selection.hasFocus()).toBe(true);
+    });
+
+    it('between inlines', function () {
+      var selection = this.initialize(_selection2.default, '<p><em>01</em><s>23</s><u>45</u></p>');
+      var expected = new _selection.Range(2, 2);
+      selection.setRange(expected);
+
+      var _selection$getRange27 = selection.getRange(),
+          _selection$getRange28 = _slicedToArray(_selection$getRange27, 1),
+          range = _selection$getRange28[0];
+
+      expect(range).toEqual(expected);
+      expect(selection.hasFocus()).toBe(true);
+    });
+
+    it('single embed', function () {
+      var selection = this.initialize(_selection2.default, '<p><img src="/assets/favicon.png"></p>');
+      var expected = new _selection.Range(1, 0);
+      selection.setRange(expected);
+
+      var _selection$getRange29 = selection.getRange(),
+          _selection$getRange30 = _slicedToArray(_selection$getRange29, 1),
+          range = _selection$getRange30[0];
+
+      expect(range).toEqual(expected);
+      expect(selection.hasFocus()).toBe(true);
+    });
+
+    it('between embeds', function () {
+      var selection = this.initialize(_selection2.default, '\n        <p>\n          <img src="/assets/favicon.png">\n          <img src="/assets/favicon.png">\n        </p>\n        <ul>\n          <li>\n            <img src="/assets/favicon.png">\n            <img src="/assets/favicon.png">\n          </li>\n        </ul>');
+      var expected = new _selection.Range(1, 3);
+      selection.setRange(expected);
+
+      var _selection$getRange31 = selection.getRange(),
+          _selection$getRange32 = _slicedToArray(_selection$getRange31, 1),
+          range = _selection$getRange32[0];
+
+      expect(range).toEqual(expected);
+      expect(selection.hasFocus()).toBe(true);
+    });
+
+    it('null', function () {
+      var selection = this.initialize(_selection2.default, '<p>0123</p>');
+      selection.setRange(new _selection.Range(1));
+
+      var _selection$getRange33 = selection.getRange(),
+          _selection$getRange34 = _slicedToArray(_selection$getRange33, 1),
+          range = _selection$getRange34[0];
+
+      expect(range).not.toEqual(null);
+      selection.setRange(null);
+
+      var _selection$getRange35 = selection.getRange();
+
+      var _selection$getRange36 = _slicedToArray(_selection$getRange35, 1);
+
+      range = _selection$getRange36[0];
+
+      expect(range).toEqual(null);
+      expect(selection.hasFocus()).toBe(false);
+    });
+  });
+
+  describe('format()', function () {
+    it('trailing', function () {
+      this.setup('<p>0123</p>', 4);
+      this.selection.format('bold', true);
+      expect(this.selection.getRange()[0].index).toEqual(4);
+      expect(this.container).toEqualHTML('\n        <p>0123<strong><span class="ql-cursor">' + _cursor2.default.CONTENTS + '</span></strong></p>\n      ');
+    });
+
+    it('split nodes', function () {
+      this.setup('<p><em>0123</em></p>', 2);
+      this.selection.format('bold', true);
+      expect(this.selection.getRange()[0].index).toEqual(2);
+      expect(this.container).toEqualHTML('\n        <p>\n          <em>01</em>\n          <strong><em><span class="ql-cursor">' + _cursor2.default.CONTENTS + '</span></em></strong>\n          <em>23</em>\n        </p>\n      ');
+    });
+
+    it('between characters', function () {
+      this.setup('<p><em>0</em><strong>1</strong></p>', 1);
+      this.selection.format('underline', true);
+      expect(this.selection.getRange()[0].index).toEqual(1);
+      expect(this.container).toEqualHTML('\n        <p><em>0<u><span class="ql-cursor">' + _cursor2.default.CONTENTS + '</span></u></em><strong>1</strong></p>\n      ');
+    });
+
+    it('empty line', function () {
+      this.setup('<p><br></p>', 0);
+      this.selection.format('bold', true);
+      expect(this.selection.getRange()[0].index).toEqual(0);
+      expect(this.container).toEqualHTML('\n        <p><strong><span class="ql-cursor">' + _cursor2.default.CONTENTS + '</span></strong></p>\n      ');
+    });
+
+    it('cursor interference', function () {
+      this.setup('<p>0123</p>', 2);
+      this.selection.format('underline', true);
+      this.selection.scroll.update();
+      var native = this.selection.getNativeRange();
+      expect(native.start.node).toEqual(this.selection.cursor.textNode);
+    });
+
+    it('multiple', function () {
+      this.setup('<p>0123</p>', 2);
+      this.selection.format('color', 'red');
+      this.selection.format('italic', true);
+      this.selection.format('underline', true);
+      this.selection.format('background', 'blue');
+      expect(this.selection.getRange()[0].index).toEqual(2);
+      expect(this.container).toEqualHTML('\n        <p>\n          01\n          <em style="color: red; background-color: blue;"><u>\n            <span class="ql-cursor">' + _cursor2.default.CONTENTS + '</span>\n          </u></em>\n          23\n        </p>\n      ');
+    });
+
+    it('remove format', function () {
+      this.setup('<p><strong>0123</strong></p>', 2);
+      this.selection.format('italic', true);
+      this.selection.format('underline', true);
+      this.selection.format('italic', false);
+      expect(this.selection.getRange()[0].index).toEqual(2);
+      expect(this.container).toEqualHTML('\n        <p>\n          <strong>\n            01<u><span class="ql-cursor">' + _cursor2.default.CONTENTS + '</span></u>23\n          </strong>\n        </p>\n      ');
+    });
+
+    it('selection change cleanup', function () {
+      this.setup('<p>0123</p>', 2);
+      this.selection.format('italic', true);
+      this.selection.setRange(new _selection.Range(0, 0));
+      this.selection.scroll.update();
+      expect(this.container).toEqualHTML('<p>0123</p>');
+    });
+
+    it('text change cleanup', function () {
+      this.setup('<p>0123</p>', 2);
+      this.selection.format('italic', true);
+      this.selection.cursor.textNode.data = _cursor2.default.CONTENTS + '|';
+      this.selection.setNativeRange(this.selection.cursor.textNode, 2);
+      this.selection.scroll.update();
+      expect(this.container).toEqualHTML('<p>01<em>|</em>23</p>');
+    });
+
+    it('no cleanup', function () {
+      this.setup('<p>0123</p><p><br></p>', 2);
+      this.selection.format('italic', true);
+      this.container.removeChild(this.container.lastChild);
+      this.selection.scroll.update();
+      expect(this.selection.getRange()[0].index).toEqual(2);
+      expect(this.container).toEqualHTML('\n        <p>01<em><span class="ql-cursor">' + _cursor2.default.CONTENTS + '</span></em>23</p>\n      ');
+    });
+  });
+
+  describe('getBounds()', function () {
+    beforeEach(function () {
+      this.container.classList.add('ql-editor');
+      this.container.style.fontFamily = 'monospace';
+      this.container.style.lineHeight = /Trident/i.test(navigator.userAgent) ? '18px' : 'initial';
+      this.initialize(HTMLElement, '<div></div><div>&nbsp;</div>');
+      this.div = this.container.firstChild;
+      this.div.style.border = '1px solid #777';
+      // this.float is for visually a check, does not affect test itself
+      this.float = this.container.lastChild;
+      this.float.style.backgroundColor = 'red';
+      this.float.style.position = 'absolute';
+      this.float.style.width = '1px';
+      if (this.reference != null) return;
+      this.initialize(HTMLElement, '<p><span>0</span></p>', this.div);
+      var span = this.div.firstChild.firstChild;
+      span.style.display = 'inline-block'; // IE11 needs this to respect line height
+      var bounds = span.getBoundingClientRect();
+      this.reference = {
+        height: bounds.height,
+        left: bounds.left,
+        lineHeight: span.parentNode.offsetHeight,
+        width: bounds.width,
+        top: bounds.top
+      };
+      this.initialize(HTMLElement, '', this.div);
+    });
+
+    afterEach(function () {
+      this.float.style.left = this.bounds.left + 'px';
+      this.float.style.top = this.bounds.top + 'px';
+      this.float.style.height = this.bounds.height + 'px';
+    });
+
+    it('empty document', function () {
+      var selection = this.initialize(_selection2.default, '<p><br></p>', this.div);
+      this.bounds = selection.getBounds(0);
+      if (/Android/i.test(navigator.userAgent)) return; // false positive on emulators atm
+      expect(this.bounds.left).toBeApproximately(this.reference.left, 1);
+      expect(this.bounds.height).toBeApproximately(this.reference.height, 1);
+      expect(this.bounds.top).toBeApproximately(this.reference.top, 1);
+    });
+
+    it('empty line', function () {
+      var selection = this.initialize(_selection2.default, '\n        <p>0000</p>\n        <p><br></p>\n        <p>0000</p>', this.div);
+      this.bounds = selection.getBounds(5);
+      if (/Android/i.test(navigator.userAgent)) return; // false positive on emulators atm
+      expect(this.bounds.left).toBeApproximately(this.reference.left, 1);
+      expect(this.bounds.height).toBeApproximately(this.reference.height, 1);
+      expect(this.bounds.top).toBeApproximately(this.reference.top + this.reference.lineHeight, 2);
+    });
+
+    it('plain text', function () {
+      var selection = this.initialize(_selection2.default, '<p>0123</p>', this.div);
+      this.bounds = selection.getBounds(2);
+      expect(this.bounds.left).toBeApproximately(this.reference.left + this.reference.width * 2, 2);
+      expect(this.bounds.height).toBeApproximately(this.reference.height, 1);
+      expect(this.bounds.top).toBeApproximately(this.reference.top, 1);
+    });
+
+    it('multiple characters', function () {
+      var selection = this.initialize(_selection2.default, '<p>0123</p>', this.div);
+      this.bounds = selection.getBounds(1, 2);
+      expect(this.bounds.left).toBeApproximately(this.reference.left + this.reference.width, 2);
+      expect(this.bounds.height).toBeApproximately(this.reference.height, 1);
+      expect(this.bounds.top).toBeApproximately(this.reference.top, 1);
+      expect(this.bounds.width).toBeApproximately(this.reference.width * 2, 2);
+    });
+
+    it('start of line', function () {
+      var selection = this.initialize(_selection2.default, '\n        <p>0000</p>\n        <p>0000</p>', this.div);
+      this.bounds = selection.getBounds(5);
+      expect(this.bounds.left).toBeApproximately(this.reference.left, 1);
+      expect(this.bounds.height).toBeApproximately(this.reference.height, 1);
+      expect(this.bounds.top).toBeApproximately(this.reference.top + this.reference.lineHeight, 1);
+    });
+
+    it('end of line', function () {
+      var selection = this.initialize(_selection2.default, '\n        <p>0000</p>\n        <p>0000</p>\n        <p>0000</p>', this.div);
+      this.bounds = selection.getBounds(9);
+      expect(this.bounds.left).toBeApproximately(this.reference.left + this.reference.width * 4, 4);
+      expect(this.bounds.height).toBeApproximately(this.reference.height, 1);
+      expect(this.bounds.top).toBeApproximately(this.reference.top + this.reference.lineHeight, 1);
+    });
+
+    it('multiple lines', function () {
+      var selection = this.initialize(_selection2.default, '\n        <p>0000</p>\n        <p>0000</p>\n        <p>0000</p>', this.div);
+      this.bounds = selection.getBounds(2, 4);
+      expect(this.bounds.left).toBeApproximately(this.reference.left, 1);
+      expect(this.bounds.height).toBeApproximately(this.reference.height * 2, 2);
+      expect(this.bounds.top).toBeApproximately(this.reference.top, 1);
+      expect(this.bounds.width).toBeGreaterThan(3 * this.reference.width);
+    });
+
+    it('large text', function () {
+      var selection = this.initialize(_selection2.default, '<p><span class="ql-size-large">0000</span></p>', this.div);
+      var span = this.div.querySelector('span');
+      if (/Trident/i.test(navigator.userAgent)) {
+        span.style.lineHeight = '27px';
+      }
+      this.bounds = selection.getBounds(2);
+      expect(this.bounds.left).toBeApproximately(this.reference.left + span.offsetWidth / 2, 1);
+      expect(this.bounds.height).toBeApproximately(span.offsetHeight, 1);
+      expect(this.bounds.top).toBeApproximately(this.reference.top, 1);
+    });
+
+    it('image', function () {
+      var selection = this.initialize(_selection2.default, '\n        <p>\n          <img src="/assets/favicon.png" width="32px" height="32px">\n          <img src="/assets/favicon.png" width="32px" height="32px">\n        </p>', this.div);
+      this.bounds = selection.getBounds(1);
+      expect(this.bounds.left).toBeApproximately(this.reference.left + 32, 1);
+      expect(this.bounds.height).toBeApproximately(32, 1);
+      expect(this.bounds.top).toBeApproximately(this.reference.top, 1);
+    });
+
+    it('beyond document', function () {
+      var _this2 = this;
+
+      var selection = this.initialize(_selection2.default, '<p>0123</p>');
+      expect(function () {
+        _this2.bounds = selection.getBounds(10, 0);
+      }).not.toThrow();
+      expect(function () {
+        _this2.bounds = selection.getBounds(0, 10);
+      }).not.toThrow();
+    });
+  });
+});
+
+/***/ }),
+/* 122 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+var _quillDelta = __webpack_require__(2);
+
+var _quillDelta2 = _interopRequireDefault(_quillDelta);
+
+var _quill = __webpack_require__(5);
+
+var _quill2 = _interopRequireDefault(_quill);
+
+var _theme = __webpack_require__(34);
+
+var _theme2 = _interopRequireDefault(_theme);
+
+var _emitter = __webpack_require__(8);
+
+var _emitter2 = _interopRequireDefault(_emitter);
+
+var _toolbar = __webpack_require__(57);
+
+var _toolbar2 = _interopRequireDefault(_toolbar);
+
+var _snow = __webpack_require__(62);
+
+var _snow2 = _interopRequireDefault(_snow);
+
+var _selection = __webpack_require__(15);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+describe('Quill', function () {
+  it('imports', function () {
+    Object.keys(_quill2.default.imports).forEach(function (path) {
+      expect(_quill2.default.import(path)).toBeTruthy();
+    });
+  });
+
+  describe('construction', function () {
+    it('empty', function () {
+      var quill = this.initialize(_quill2.default, '');
+      expect(quill.getContents()).toEqual(new _quillDelta2.default().insert('\n'));
+      expect(quill.root).toEqualHTML('<p><br></p>');
+    });
+
+    it('text', function () {
+      var quill = this.initialize(_quill2.default, '0123');
+      expect(quill.getContents()).toEqual(new _quillDelta2.default().insert('0123\n'));
+      expect(quill.root).toEqualHTML('<p>0123</p>');
+    });
+
+    it('newlines', function () {
+      var quill = this.initialize(_quill2.default, '<p><br></p><p><br></p><p><br></p>');
+      expect(quill.getContents()).toEqual(new _quillDelta2.default().insert('\n\n\n'));
+      expect(quill.root).toEqualHTML('<p><br></p><p><br></p><p><br></p>');
+    });
+
+    it('formatted ending', function () {
+      var quill = this.initialize(_quill2.default, '<p class="ql-align-center">Test</p>');
+      expect(quill.getContents()).toEqual(new _quillDelta2.default().insert('Test').insert('\n', { align: 'center' }));
+      expect(quill.root).toEqualHTML('<p class="ql-align-center">Test</p>');
+    });
+  });
+
+  describe('api', function () {
+    beforeEach(function () {
+      this.quill = this.initialize(_quill2.default, '<p>0123<em>45</em>67</p>');
+      this.oldDelta = this.quill.getContents();
+      spyOn(this.quill.emitter, 'emit').and.callThrough();
+    });
+
+    it('deleteText()', function () {
+      this.quill.deleteText(3, 2);
+      var change = new _quillDelta2.default().retain(3).delete(2);
+      expect(this.quill.root).toEqualHTML('<p>012<em>5</em>67</p>');
+      expect(this.quill.emitter.emit).toHaveBeenCalledWith(_emitter2.default.events.TEXT_CHANGE, change, this.oldDelta, _emitter2.default.sources.API);
+    });
+
+    it('format()', function () {
+      this.quill.setSelection(3, 2);
+      this.quill.format('bold', true);
+      var change = new _quillDelta2.default().retain(3).retain(2, { bold: true });
+      expect(this.quill.root).toEqualHTML('<p>012<strong>3<em>4</em></strong><em>5</em>67</p>');
+      expect(this.quill.emitter.emit).toHaveBeenCalledWith(_emitter2.default.events.TEXT_CHANGE, change, this.oldDelta, _emitter2.default.sources.API);
+      expect(this.quill.getSelection()).toEqual(new _selection.Range(3, 2));
+    });
+
+    it('formatLine()', function () {
+      this.quill.formatLine(1, 1, 'header', 2);
+      var change = new _quillDelta2.default().retain(8).retain(1, { header: 2 });
+      expect(this.quill.root).toEqualHTML('<h2>0123<em>45</em>67</h2>');
+      expect(this.quill.emitter.emit).toHaveBeenCalledWith(_emitter2.default.events.TEXT_CHANGE, change, this.oldDelta, _emitter2.default.sources.API);
+    });
+
+    it('formatText()', function () {
+      this.quill.formatText(3, 2, 'bold', true);
+      var change = new _quillDelta2.default().retain(3).retain(2, { bold: true });
+      expect(this.quill.root).toEqualHTML('<p>012<strong>3<em>4</em></strong><em>5</em>67</p>');
+      expect(this.quill.emitter.emit).toHaveBeenCalledWith(_emitter2.default.events.TEXT_CHANGE, change, this.oldDelta, _emitter2.default.sources.API);
+    });
+
+    it('insertEmbed()', function () {
+      this.quill.insertEmbed(5, 'image', '/assets/favicon.png');
+      var change = new _quillDelta2.default().retain(5).insert({ image: '/assets/favicon.png' }, { italic: true });
+      expect(this.quill.root).toEqualHTML('<p>0123<em>4<img src="/assets/favicon.png">5</em>67</p>');
+      expect(this.quill.emitter.emit).toHaveBeenCalledWith(_emitter2.default.events.TEXT_CHANGE, change, this.oldDelta, _emitter2.default.sources.API);
+    });
+
+    it('insertText()', function () {
+      this.quill.insertText(5, '|', 'bold', true);
+      var change = new _quillDelta2.default().retain(5).insert('|', { bold: true, italic: true });
+      expect(this.quill.root).toEqualHTML('<p>0123<em>4</em><strong><em>|</em></strong><em>5</em>67</p>');
+      expect(this.quill.emitter.emit).toHaveBeenCalledWith(_emitter2.default.events.TEXT_CHANGE, change, this.oldDelta, _emitter2.default.sources.API);
+    });
+
+    it('enable/disable', function () {
+      this.quill.disable();
+      expect(this.quill.root.getAttribute('contenteditable')).toEqual('false');
+      this.quill.enable();
+      expect(this.quill.root.getAttribute('contenteditable')).toBeTruthy();
+    });
+
+    it('getBounds() index', function () {
+      expect(this.quill.getBounds(1)).toBeTruthy();
+    });
+
+    it('getBounds() range', function () {
+      expect(this.quill.getBounds(new _selection.Range(3, 4))).toBeTruthy();
+    });
+
+    it('getFormat()', function () {
+      var formats = this.quill.getFormat(5);
+      expect(formats).toEqual({ italic: true });
+    });
+
+    it('getSelection()', function () {
+      expect(this.quill.getSelection()).toEqual(null);
+      var range = new _selection.Range(1, 2);
+      this.quill.setSelection(range);
+      expect(this.quill.getSelection()).toEqual(range);
+    });
+
+    it('pasteHTML(html)', function () {
+      this.quill.pasteHTML('<i>ab</i><b>cd</b>');
+      expect(this.quill.root).toEqualHTML('<p><em>ab</em><strong>cd</strong></p>');
+    });
+
+    it('pasteHTML(index, html)', function () {
+      this.quill.pasteHTML(2, '<b>ab</b>');
+      expect(this.quill.root).toEqualHTML('<p>01<strong>ab</strong>23<em>45</em>67</p>');
+    });
+
+    it('removeFormat()', function () {
+      this.quill.removeFormat(5, 1);
+      var change = new _quillDelta2.default().retain(5).retain(1, { italic: null });
+      expect(this.quill.root).toEqualHTML('<p>0123<em>4</em>567</p>');
+      expect(this.quill.emitter.emit).toHaveBeenCalledWith(_emitter2.default.events.TEXT_CHANGE, change, this.oldDelta, _emitter2.default.sources.API);
+    });
+
+    it('updateContents() delta', function () {
+      var delta = new _quillDelta2.default().retain(5).insert('|');
+      this.quill.updateContents(delta);
+      expect(this.quill.root).toEqualHTML('<p>0123<em>4</em>|<em>5</em>67</p>');
+      expect(this.quill.emitter.emit).toHaveBeenCalledWith(_emitter2.default.events.TEXT_CHANGE, delta, this.oldDelta, _emitter2.default.sources.API);
+    });
+
+    it('updateContents() ops array', function () {
+      var delta = new _quillDelta2.default().retain(5).insert('|');
+      this.quill.updateContents(delta.ops);
+      expect(this.quill.root).toEqualHTML('<p>0123<em>4</em>|<em>5</em>67</p>');
+      expect(this.quill.emitter.emit).toHaveBeenCalledWith(_emitter2.default.events.TEXT_CHANGE, delta, this.oldDelta, _emitter2.default.sources.API);
+    });
+  });
+
+  describe('events', function () {
+    beforeEach(function () {
+      this.quill = this.initialize(_quill2.default, '<p>0123</p>');
+      this.quill.update();
+      spyOn(this.quill.emitter, 'emit').and.callThrough();
+      this.oldDelta = this.quill.getContents();
+    });
+
+    it('api text insert', function () {
+      this.quill.insertText(2, '!');
+      var delta = new _quillDelta2.default().retain(2).insert('!');
+      expect(this.quill.emitter.emit).toHaveBeenCalledWith(_emitter2.default.events.TEXT_CHANGE, delta, this.oldDelta, _emitter2.default.sources.API);
+    });
+
+    it('user text insert', function (done) {
+      var _this = this;
+
+      this.container.firstChild.firstChild.firstChild.data = '01!23';
+      var delta = new _quillDelta2.default().retain(2).insert('!');
+      setTimeout(function () {
+        expect(_this.quill.emitter.emit).toHaveBeenCalledWith(_emitter2.default.events.TEXT_CHANGE, delta, _this.oldDelta, _emitter2.default.sources.USER);
+        done();
+      }, 1);
+    });
+
+    it('insert same character', function (done) {
+      var _this2 = this;
+
+      this.quill.setText('aaaa\n');
+      this.quill.setSelection(2);
+      this.quill.update();
+      var old = this.quill.getContents();
+      var textNode = this.container.firstChild.firstChild.firstChild;
+      textNode.data = 'aaaaa';
+      this.quill.selection.setNativeRange(textNode.data, 3);
+      // this.quill.selection.update(Emitter.sources.SILENT);
+      var delta = new _quillDelta2.default().retain(2).insert('a');
+      setTimeout(function () {
+        var args = _this2.quill.emitter.emit.calls.mostRecent().args;
+        expect(args).toEqual([_emitter2.default.events.TEXT_CHANGE, delta, old, _emitter2.default.sources.USER]);
+        done();
+      }, 1);
+    });
+  });
+
+  describe('setContents()', function () {
+    it('empty', function () {
+      var quill = this.initialize(_quill2.default, '');
+      var delta = new _quillDelta2.default().insert('\n');
+      quill.setContents(delta);
+      expect(quill.getContents()).toEqual(delta);
+      expect(quill.root).toEqualHTML('<p><br></p>');
+    });
+
+    it('single line', function () {
+      var quill = this.initialize(_quill2.default, '');
+      var delta = new _quillDelta2.default().insert('Hello World!\n');
+      quill.setContents(delta);
+      expect(quill.getContents()).toEqual(delta);
+      expect(quill.root).toEqualHTML('<p>Hello World!</p>');
+    });
+
+    it('multiple lines', function () {
+      var quill = this.initialize(_quill2.default, '');
+      var delta = new _quillDelta2.default().insert('Hello\n\nWorld!\n');
+      quill.setContents(delta);
+      expect(quill.getContents()).toEqual(delta);
+      expect(quill.root).toEqualHTML('<p>Hello</p><p><br></p><p>World!</p>');
+    });
+
+    it('basic formats', function () {
+      var quill = this.initialize(_quill2.default, '');
+      var delta = new _quillDelta2.default().insert('Welcome').insert('\n', { header: 1 }).insert('Hello\n').insert('World').insert('!', { bold: true }).insert('\n');
+      quill.setContents(delta);
+      expect(quill.getContents()).toEqual(delta);
+      expect(quill.root).toEqualHTML('\n        <h1>Welcome</h1>\n        <p>Hello</p>\n        <p>World<strong>!</strong></p>\n      ');
+    });
+
+    it('array of operations', function () {
+      var quill = this.initialize(_quill2.default, '');
+      var delta = new _quillDelta2.default().insert('test').insert('123', { bold: true }).insert('\n');
+      quill.setContents(delta.ops);
+      expect(quill.getContents()).toEqual(delta);
+    });
+
+    it('json', function () {
+      var quill = this.initialize(_quill2.default, '');
+      var delta = { ops: [{ insert: 'test\n' }] };
+      quill.setContents(delta);
+      expect(quill.getContents()).toEqual(new _quillDelta2.default(delta));
+    });
+
+    it('no trailing newline', function () {
+      var quill = this.initialize(_quill2.default, '<h1>Welcome</h1>');
+      quill.setContents(new _quillDelta2.default().insert('0123'));
+      expect(quill.getContents()).toEqual(new _quillDelta2.default().insert('0123\n'));
+    });
+
+    it('inline formatting', function () {
+      var quill = this.initialize(_quill2.default, '<p><strong>Bold</strong></p><p>Not bold</p>');
+      var contents = quill.getContents();
+      var delta = quill.setContents(contents);
+      expect(quill.getContents()).toEqual(contents);
+      expect(delta).toEqual(contents.delete(contents.length()));
+    });
+  });
+
+  describe('setText()', function () {
+    it('overwrite', function () {
+      var quill = this.initialize(_quill2.default, '<h1>Welcome</h1>');
+      quill.setText('abc');
+      expect(quill.root).toEqualHTML('<p>abc</p>');
+    });
+
+    it('set to newline', function () {
+      var quill = this.initialize(_quill2.default, '<h1>Welcome</h1>');
+      quill.setText('\n');
+      expect(quill.root).toEqualHTML('<p><br></p>');
+    });
+
+    it('multiple newlines', function () {
+      var quill = this.initialize(_quill2.default, '<h1>Welcome</h1>');
+      quill.setText('\n\n');
+      expect(quill.root).toEqualHTML('<p><br></p><p><br></p>');
+    });
+
+    it('content with trailing newline', function () {
+      var quill = this.initialize(_quill2.default, '<h1>Welcome</h1>');
+      quill.setText('abc\n');
+      expect(quill.root).toEqualHTML('<p>abc</p>');
+    });
+
+    it('return carriage', function () {
+      var quill = this.initialize(_quill2.default, '<p>Test</p>');
+      quill.setText('\r');
+      expect(quill.root).toEqualHTML('<p><br></p>');
+    });
+
+    it('return carriage newline', function () {
+      var quill = this.initialize(_quill2.default, '<p>Test</p>');
+      quill.setText('\r\n');
+      expect(quill.root).toEqualHTML('<p><br></p>');
+    });
+  });
+
+  describe('expandConfig', function () {
+    it('user overwrite quill', function () {
+      var config = (0, _quill.expandConfig)('#test-container', {
+        placeholder: 'Test',
+        readOnly: true
+      });
+      expect(config.placeholder).toEqual('Test');
+      expect(config.readOnly).toEqual(true);
+    });
+
+    it('convert css selectors', function () {
+      var config = (0, _quill.expandConfig)('#test-container', {
+        bounds: '#test-container'
+      });
+      expect(config.bounds).toEqual(document.querySelector('#test-container'));
+      expect(config.container).toEqual(document.querySelector('#test-container'));
+    });
+
+    it('convert module true to {}', function () {
+      var oldModules = _theme2.default.DEFAULTS.modules;
+      _theme2.default.DEFAULTS.modules = {
+        formula: true
+      };
+      var config = (0, _quill.expandConfig)('#test-container', {
+        modules: {
+          syntax: true
+        }
+      });
+      expect(config.modules.formula).toEqual({});
+      expect(config.modules.syntax).toEqual({ highlight: null, interval: 1000 });
+      _theme2.default.DEFAULTS.modules = oldModules;
+    });
+
+    describe('theme defaults', function () {
+      it('for Snow', function () {
+        var config = (0, _quill.expandConfig)('#test-container', {
+          modules: {
+            toolbar: true
+          },
+          theme: 'snow'
+        });
+        expect(config.theme).toEqual(_snow2.default);
+        expect(config.modules.toolbar.handlers.image).toEqual(_snow2.default.DEFAULTS.modules.toolbar.handlers.image);
+      });
+
+      it('for false', function () {
+        var config = (0, _quill.expandConfig)('#test-container', {
+          theme: false
+        });
+        expect(config.theme).toEqual(_theme2.default);
+      });
+
+      it('for undefined', function () {
+        var config = (0, _quill.expandConfig)('#test-container', {
+          theme: undefined
+        });
+        expect(config.theme).toEqual(_theme2.default);
+      });
+
+      it('for null', function () {
+        var config = (0, _quill.expandConfig)('#test-container', {
+          theme: null
+        });
+        expect(config.theme).toEqual(_theme2.default);
+      });
+    });
+
+    it('quill < module < theme < user', function () {
+      var oldTheme = _theme2.default.DEFAULTS.modules;
+      var oldToolbar = _toolbar2.default.DEFAULTS;
+      _toolbar2.default.DEFAULTS = {
+        option: 2,
+        module: true
+      };
+      _theme2.default.DEFAULTS.modules = {
+        toolbar: {
+          option: 1,
+          theme: true
+        }
+      };
+      var config = (0, _quill.expandConfig)('#test-container', {
+        modules: {
+          toolbar: {
+            option: 0,
+            user: true
+          }
+        }
+      });
+      expect(config.modules.toolbar).toEqual({
+        option: 0,
+        module: true,
+        theme: true,
+        user: true
+      });
+      _theme2.default.DEFAULTS.modules = oldTheme;
+      _toolbar2.default.DEFAULTS = oldToolbar;
+    });
+
+    it('toolbar default', function () {
+      var config = (0, _quill.expandConfig)('#test-container', {
+        modules: {
+          toolbar: true
+        }
+      });
+      expect(config.modules.toolbar).toEqual(_toolbar2.default.DEFAULTS);
+    });
+
+    it('toolbar disabled', function () {
+      var config = (0, _quill.expandConfig)('#test-container', {
+        modules: {
+          toolbar: false
+        },
+        theme: 'snow'
+      });
+      expect(config.modules.toolbar).toBe(undefined);
+    });
+
+    it('toolbar selector', function () {
+      var config = (0, _quill.expandConfig)('#test-container', {
+        modules: {
+          toolbar: {
+            container: '#test-container'
+          }
+        }
+      });
+      expect(config.modules.toolbar).toEqual({
+        container: '#test-container',
+        handlers: _toolbar2.default.DEFAULTS.handlers
+      });
+    });
+
+    it('toolbar container shorthand', function () {
+      var config = (0, _quill.expandConfig)('#test-container', {
+        modules: {
+          toolbar: document.querySelector('#test-container')
+        }
+      });
+      expect(config.modules.toolbar).toEqual({
+        container: document.querySelector('#test-container'),
+        handlers: _toolbar2.default.DEFAULTS.handlers
+      });
+    });
+
+    it('toolbar format array', function () {
+      var config = (0, _quill.expandConfig)('#test-container', {
+        modules: {
+          toolbar: ['bold']
+        }
+      });
+      expect(config.modules.toolbar).toEqual({
+        container: ['bold'],
+        handlers: _toolbar2.default.DEFAULTS.handlers
+      });
+    });
+
+    it('toolbar custom handler, default container', function () {
+      var handler = function handler() {}; // eslint-disable-line func-style
+      var config = (0, _quill.expandConfig)('#test-container', {
+        modules: {
+          toolbar: {
+            handlers: {
+              bold: handler
+            }
+          }
+        }
+      });
+      expect(config.modules.toolbar.container).toEqual(null);
+      expect(config.modules.toolbar.handlers.bold).toEqual(handler);
+      expect(config.modules.toolbar.handlers.clean).toEqual(_toolbar2.default.DEFAULTS.handlers.clean);
+    });
+  });
+
+  describe('overload', function () {
+    it('(index:number, length:number)', function () {
+      var _overload = (0, _quill.overload)(0, 1),
+          _overload2 = _slicedToArray(_overload, 4),
+          index = _overload2[0],
+          length = _overload2[1],
+          formats = _overload2[2],
+          source = _overload2[3];
+
+      expect(index).toBe(0);
+      expect(length).toBe(1);
+      expect(formats).toEqual({});
+      expect(source).toBe(_quill2.default.sources.API);
+    });
+
+    it('(index:number, length:number, format:string, value:boolean, source:string)', function () {
+      var _overload3 = (0, _quill.overload)(0, 1, 'bold', true, _quill2.default.sources.USER),
+          _overload4 = _slicedToArray(_overload3, 4),
+          index = _overload4[0],
+          length = _overload4[1],
+          formats = _overload4[2],
+          source = _overload4[3];
+
+      expect(index).toBe(0);
+      expect(length).toBe(1);
+      expect(formats).toEqual({ bold: true });
+      expect(source).toBe(_quill2.default.sources.USER);
+    });
+
+    it('(index:number, length:number, format:string, value:string, source:string)', function () {
+      var _overload5 = (0, _quill.overload)(0, 1, 'color', _quill2.default.sources.USER, _quill2.default.sources.USER),
+          _overload6 = _slicedToArray(_overload5, 4),
+          index = _overload6[0],
+          length = _overload6[1],
+          formats = _overload6[2],
+          source = _overload6[3];
+
+      expect(index).toBe(0);
+      expect(length).toBe(1);
+      expect(formats).toEqual({ color: _quill2.default.sources.USER });
+      expect(source).toBe(_quill2.default.sources.USER);
+    });
+
+    it('(index:number, length:number, format:string, value:string)', function () {
+      var _overload7 = (0, _quill.overload)(0, 1, 'color', _quill2.default.sources.USER),
+          _overload8 = _slicedToArray(_overload7, 4),
+          index = _overload8[0],
+          length = _overload8[1],
+          formats = _overload8[2],
+          source = _overload8[3];
+
+      expect(index).toBe(0);
+      expect(length).toBe(1);
+      expect(formats).toEqual({ color: _quill2.default.sources.USER });
+      expect(source).toBe(_quill2.default.sources.API);
+    });
+
+    it('(index:number, length:number, format:object)', function () {
+      var _overload9 = (0, _quill.overload)(0, 1, { bold: true }),
+          _overload10 = _slicedToArray(_overload9, 4),
+          index = _overload10[0],
+          length = _overload10[1],
+          formats = _overload10[2],
+          source = _overload10[3];
+
+      expect(index).toBe(0);
+      expect(length).toBe(1);
+      expect(formats).toEqual({ bold: true });
+      expect(source).toBe(_quill2.default.sources.API);
+    });
+
+    it('(index:number, length:number, format:object, source:string)', function () {
+      var _overload11 = (0, _quill.overload)(0, 1, { bold: true }, _quill2.default.sources.USER),
+          _overload12 = _slicedToArray(_overload11, 4),
+          index = _overload12[0],
+          length = _overload12[1],
+          formats = _overload12[2],
+          source = _overload12[3];
+
+      expect(index).toBe(0);
+      expect(length).toBe(1);
+      expect(formats).toEqual({ bold: true });
+      expect(source).toBe(_quill2.default.sources.USER);
+    });
+
+    it('(index:number, length:number, source:string)', function () {
+      var _overload13 = (0, _quill.overload)(0, 1, _quill2.default.sources.USER),
+          _overload14 = _slicedToArray(_overload13, 4),
+          index = _overload14[0],
+          length = _overload14[1],
+          formats = _overload14[2],
+          source = _overload14[3];
+
+      expect(index).toBe(0);
+      expect(length).toBe(1);
+      expect(formats).toEqual({});
+      expect(source).toBe(_quill2.default.sources.USER);
+    });
+
+    it('(index:number, source:string)', function () {
+      var _overload15 = (0, _quill.overload)(0, _quill2.default.sources.USER),
+          _overload16 = _slicedToArray(_overload15, 4),
+          index = _overload16[0],
+          length = _overload16[1],
+          formats = _overload16[2],
+          source = _overload16[3];
+
+      expect(index).toBe(0);
+      expect(length).toBe(0);
+      expect(formats).toEqual({});
+      expect(source).toBe(_quill2.default.sources.USER);
+    });
+
+    it('(range:range)', function () {
+      var _overload17 = (0, _quill.overload)(new _selection.Range(0, 1)),
+          _overload18 = _slicedToArray(_overload17, 4),
+          index = _overload18[0],
+          length = _overload18[1],
+          formats = _overload18[2],
+          source = _overload18[3];
+
+      expect(index).toBe(0);
+      expect(length).toBe(1);
+      expect(formats).toEqual({});
+      expect(source).toBe(_quill2.default.sources.API);
+    });
+
+    it('(range:range, format:string, value:boolean, source:string)', function () {
+      var _overload19 = (0, _quill.overload)(new _selection.Range(0, 1), 'bold', true, _quill2.default.sources.USER),
+          _overload20 = _slicedToArray(_overload19, 4),
+          index = _overload20[0],
+          length = _overload20[1],
+          formats = _overload20[2],
+          source = _overload20[3];
+
+      expect(index).toBe(0);
+      expect(length).toBe(1);
+      expect(formats).toEqual({ bold: true });
+      expect(source).toBe(_quill2.default.sources.USER);
+    });
+
+    it('(range:range, format:string, value:string, source:string)', function () {
+      var _overload21 = (0, _quill.overload)(new _selection.Range(0, 1), 'color', _quill2.default.sources.API, _quill2.default.sources.USER),
+          _overload22 = _slicedToArray(_overload21, 4),
+          index = _overload22[0],
+          length = _overload22[1],
+          formats = _overload22[2],
+          source = _overload22[3];
+
+      expect(index).toBe(0);
+      expect(length).toBe(1);
+      expect(formats).toEqual({ color: _quill2.default.sources.API });
+      expect(source).toBe(_quill2.default.sources.USER);
+    });
+
+    it('(range:range, format:string, value:string)', function () {
+      var _overload23 = (0, _quill.overload)(new _selection.Range(0, 1), 'color', _quill2.default.sources.USER),
+          _overload24 = _slicedToArray(_overload23, 4),
+          index = _overload24[0],
+          length = _overload24[1],
+          formats = _overload24[2],
+          source = _overload24[3];
+
+      expect(index).toBe(0);
+      expect(length).toBe(1);
+      expect(formats).toEqual({ color: _quill2.default.sources.USER });
+      expect(source).toBe(_quill2.default.sources.API);
+    });
+
+    it('(range:range, format:object)', function () {
+      var _overload25 = (0, _quill.overload)(new _selection.Range(0, 1), { bold: true }),
+          _overload26 = _slicedToArray(_overload25, 4),
+          index = _overload26[0],
+          length = _overload26[1],
+          formats = _overload26[2],
+          source = _overload26[3];
+
+      expect(index).toBe(0);
+      expect(length).toBe(1);
+      expect(formats).toEqual({ bold: true });
+      expect(source).toBe(_quill2.default.sources.API);
+    });
+
+    it('(range:range, format:object, source:string)', function () {
+      var _overload27 = (0, _quill.overload)(new _selection.Range(0, 1), { bold: true }, _quill2.default.sources.USER),
+          _overload28 = _slicedToArray(_overload27, 4),
+          index = _overload28[0],
+          length = _overload28[1],
+          formats = _overload28[2],
+          source = _overload28[3];
+
+      expect(index).toBe(0);
+      expect(length).toBe(1);
+      expect(formats).toEqual({ bold: true });
+      expect(source).toBe(_quill2.default.sources.USER);
+    });
+
+    it('(range:range, source:string)', function () {
+      var _overload29 = (0, _quill.overload)(new _selection.Range(0, 1), _quill2.default.sources.USER),
+          _overload30 = _slicedToArray(_overload29, 4),
+          index = _overload30[0],
+          length = _overload30[1],
+          formats = _overload30[2],
+          source = _overload30[3];
+
+      expect(index).toBe(0);
+      expect(length).toBe(1);
+      expect(formats).toEqual({});
+      expect(source).toBe(_quill2.default.sources.USER);
+    });
+
+    it('(range:range)', function () {
+      var _overload31 = (0, _quill.overload)(new _selection.Range(0, 1)),
+          _overload32 = _slicedToArray(_overload31, 4),
+          index = _overload32[0],
+          length = _overload32[1],
+          formats = _overload32[2],
+          source = _overload32[3];
+
+      expect(index).toBe(0);
+      expect(length).toBe(1);
+      expect(formats).toEqual({});
+      expect(source).toBe(_quill2.default.sources.API);
+    });
+
+    it('(range:range, dummy:number)', function () {
+      var _overload33 = (0, _quill.overload)(new _selection.Range(10, 1), 0),
+          _overload34 = _slicedToArray(_overload33, 4),
+          index = _overload34[0],
+          length = _overload34[1],
+          formats = _overload34[2],
+          source = _overload34[3];
+
+      expect(index).toBe(10);
+      expect(length).toBe(1);
+      expect(formats).toEqual({});
+      expect(source).toBe(_quill2.default.sources.API);
+    });
+
+    it('(range:range, dummy:number, format:string, value:boolean)', function () {
+      var _overload35 = (0, _quill.overload)(new _selection.Range(10, 1), 0, 'bold', true),
+          _overload36 = _slicedToArray(_overload35, 4),
+          index = _overload36[0],
+          length = _overload36[1],
+          formats = _overload36[2],
+          source = _overload36[3];
+
+      expect(index).toBe(10);
+      expect(length).toBe(1);
+      expect(formats).toEqual({ bold: true });
+      expect(source).toBe(_quill2.default.sources.API);
+    });
+
+    it('(range:range, dummy:number, format:object, source:string)', function () {
+      var _overload37 = (0, _quill.overload)(new _selection.Range(10, 1), 0, { bold: true }, _quill2.default.sources.USER),
+          _overload38 = _slicedToArray(_overload37, 4),
+          index = _overload38[0],
+          length = _overload38[1],
+          formats = _overload38[2],
+          source = _overload38[3];
+
+      expect(index).toBe(10);
+      expect(length).toBe(1);
+      expect(formats).toEqual({ bold: true });
+      expect(source).toBe(_quill2.default.sources.USER);
+    });
+  });
+
+  describe('placeholder', function () {
+    beforeEach(function () {
+      this.initialize(HTMLElement, '<div><p></p></div>');
+      this.quill = new _quill2.default(this.container.firstChild, {
+        'placeholder': 'a great day to be a placeholder'
+      });
+      this.original = this.quill.getContents();
+    });
+
+    it('blank editor', function () {
+      expect(this.quill.root.dataset.placeholder).toEqual('a great day to be a placeholder');
+      expect(this.quill.root.classList).toContain('ql-blank');
+    });
+
+    it('with text', function () {
+      this.quill.setText('test');
+      expect(this.quill.root.classList).not.toContain('ql-blank');
+    });
+
+    it('formatted line', function () {
+      this.quill.formatLine(0, 1, 'list', 'ordered');
+      expect(this.quill.root.classList).not.toContain('ql-blank');
+    });
+  });
+});
+
+/***/ }),
+/* 123 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _quillDelta = __webpack_require__(2);
+
+var _quillDelta2 = _interopRequireDefault(_quillDelta);
+
+var _editor = __webpack_require__(14);
+
+var _editor2 = _interopRequireDefault(_editor);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+describe('Color', function () {
+  it('add', function () {
+    var editor = this.initialize(_editor2.default, '<p>0123</p>');
+    editor.formatText(1, 2, { color: 'red' });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0').insert('12', { color: 'red' }).insert('3\n'));
+    expect(editor.scroll.domNode).toEqualHTML('<p>0<span style="color: red;">12</span>3</p>');
+  });
+
+  it('remove', function () {
+    var editor = this.initialize(_editor2.default, '<p>0<strong style="color: red;">12</strong>3</p>');
+    editor.formatText(1, 2, { color: false });
+    var delta = new _quillDelta2.default().insert('0').insert('12', { bold: true }).insert('3\n');
+    expect(editor.getDelta()).toEqual(delta);
+    expect(editor.scroll.domNode).toEqualHTML('<p>0<strong>12</strong>3</p>');
+  });
+
+  it('remove unwrap', function () {
+    var editor = this.initialize(_editor2.default, '<p>0<span style="color: red;">12</span>3</p>');
+    editor.formatText(1, 2, { color: false });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123\n'));
+    expect(editor.scroll.domNode).toEqualHTML('<p>0123</p>');
+  });
+
+  it('invalid scope', function () {
+    var editor = this.initialize(_editor2.default, '<p>0123</p>');
+    var initial = editor.scroll.domNode.innerHTML;
+    editor.formatText(4, 1, { color: 'red' });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123\n'));
+    expect(editor.scroll.domNode).toEqualHTML(initial);
+  });
+});
+
+/***/ }),
+/* 124 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _quillDelta = __webpack_require__(2);
+
+var _quillDelta2 = _interopRequireDefault(_quillDelta);
+
+var _editor = __webpack_require__(14);
+
+var _editor2 = _interopRequireDefault(_editor);
+
+var _link = __webpack_require__(27);
+
+var _link2 = _interopRequireDefault(_link);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+describe('Link', function () {
+  it('add', function () {
+    var editor = this.initialize(_editor2.default, '<p>0123</p>');
+    editor.formatText(1, 2, { link: 'https://quilljs.com' });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0').insert('12', { link: 'https://quilljs.com' }).insert('3\n'));
+    expect(editor.scroll.domNode).toEqualHTML('<p>0<a href="https://quilljs.com" target="_blank">12</a>3</p>');
+  });
+
+  it('add invalid', function () {
+    var editor = this.initialize(_editor2.default, '<p>0123</p>');
+    editor.formatText(1, 2, { link: 'javascript:alert(0);' }); // eslint-disable-line no-script-url
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0').insert('12', { link: _link2.default.SANITIZED_URL }).insert('3\n'));
+  });
+
+  it('add non-whitelisted protocol', function () {
+    var editor = this.initialize(_editor2.default, '<p>0123</p>');
+    editor.formatText(1, 2, { link: 'gopher://quilljs.com' });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0').insert('12', { link: _link2.default.SANITIZED_URL }).insert('3\n'));
+    expect(editor.scroll.domNode).toEqualHTML('<p>0<a href="about:blank" target="_blank">12</a>3</p>');
+  });
+
+  it('change', function () {
+    var editor = this.initialize(_editor2.default, '<p>0<a href="https://github.com" target="_blank">12</a>3</p>');
+    editor.formatText(1, 2, { link: 'https://quilljs.com' });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0').insert('12', { link: 'https://quilljs.com' }).insert('3\n'));
+    expect(editor.scroll.domNode).toEqualHTML('<p>0<a href="https://quilljs.com" target="_blank">12</a>3</p>');
+  });
+
+  it('remove', function () {
+    var editor = this.initialize(_editor2.default, '<p>0<a class="ql-size-large" href="https://quilljs.com" target="_blank">12</a>3</p>');
+    editor.formatText(1, 2, { link: false });
+    var delta = new _quillDelta2.default().insert('0').insert('12', { size: 'large' }).insert('3\n');
+    expect(editor.getDelta()).toEqual(delta);
+    expect(editor.scroll.domNode).toEqualHTML('<p>0<span class="ql-size-large">12</span>3</p>');
+  });
+});
+
+/***/ }),
+/* 125 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _editor = __webpack_require__(14);
+
+var _editor2 = _interopRequireDefault(_editor);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+describe('Script', function () {
+  it('add', function () {
+    var editor = this.initialize(_editor2.default, '<p>a<sup>2</sup> + b2 = c<sup>2</sup></p>');
+    editor.formatText(6, 1, { script: 'super' });
+    expect(editor.scroll.domNode).toEqualHTML('<p>a<sup>2</sup> + b<sup>2</sup> = c<sup>2</sup></p>');
+  });
+
+  it('remove', function () {
+    var editor = this.initialize(_editor2.default, '<p>a<sup>2</sup> + b<sup>2</sup></p>');
+    editor.formatText(1, 1, { script: false });
+    expect(editor.scroll.domNode).toEqualHTML('<p>a2 + b<sup>2</sup></p>');
+  });
+
+  it('replace', function () {
+    var editor = this.initialize(_editor2.default, '<p>a<sup>2</sup> + b<sup>2</sup></p>');
+    editor.formatText(1, 1, { script: 'sub' });
+    expect(editor.scroll.domNode).toEqualHTML('<p>a<sub>2</sub> + b<sup>2</sup></p>');
+  });
+});
+
+/***/ }),
+/* 126 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _quillDelta = __webpack_require__(2);
+
+var _quillDelta2 = _interopRequireDefault(_quillDelta);
+
+var _editor = __webpack_require__(14);
+
+var _editor2 = _interopRequireDefault(_editor);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+describe('Align', function () {
+  it('add', function () {
+    var editor = this.initialize(_editor2.default, '<p>0123</p>');
+    editor.formatText(4, 1, { align: 'center' });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123').insert('\n', { align: 'center' }));
+    expect(editor.scroll.domNode).toEqualHTML('<p class="ql-align-center">0123</p>');
+  });
+
+  it('remove', function () {
+    var editor = this.initialize(_editor2.default, '<p class="ql-align-center">0123</p>');
+    editor.formatText(4, 1, { align: false });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123\n'));
+    expect(editor.scroll.domNode).toEqualHTML('<p>0123</p>');
+  });
+
+  it('whitelist', function () {
+    var editor = this.initialize(_editor2.default, '<p class="ql-align-center">0123</p>');
+    var initial = editor.scroll.domNode.innerHTML;
+    editor.formatText(4, 1, { align: 'middle' });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123').insert('\n', { align: 'center' }));
+    expect(editor.scroll.domNode).toEqualHTML(initial);
+  });
+
+  it('invalid scope', function () {
+    var editor = this.initialize(_editor2.default, '<p>0123</p>');
+    var initial = editor.scroll.domNode.innerHTML;
+    editor.formatText(1, 2, { align: 'center' });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123\n'));
+    expect(editor.scroll.domNode).toEqualHTML(initial);
+  });
+});
+
+/***/ }),
+/* 127 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _quillDelta = __webpack_require__(2);
+
+var _quillDelta2 = _interopRequireDefault(_quillDelta);
+
+var _editor = __webpack_require__(14);
+
+var _editor2 = _interopRequireDefault(_editor);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+describe('Code', function () {
+  it('newline', function () {
+    var editor = this.initialize(_editor2.default, '\n      <pre></pre>\n      <p><br></p>\n      <pre>\n</pre>\n      <p><br></p>\n      <pre>\n\n</pre>\n      <p><br></p>\n    ');
+    expect(editor.scroll.domNode).toEqualHTML('\n      <pre>\n</pre>\n      <p><br></p>\n      <pre>\n</pre>\n      <p><br></p>\n      <pre>\n\n</pre>\n      <p><br></p>\n    ');
+  });
+
+  it('default child', function () {
+    var editor = this.initialize(_editor2.default, '<p><br></p>');
+    editor.formatLine(0, 1, { 'code-block': true });
+    expect(editor.scroll.domNode.innerHTML).toEqual('<pre spellcheck="false">\n</pre>');
+  });
+
+  it('merge', function () {
+    var editor = this.initialize(_editor2.default, '\n      <pre>0</pre>\n      <pre>0</pre>\n      <p><br></p>\n      <pre>0</pre>\n      <pre>1\n</pre>\n      <p><br></p>\n      <pre>0</pre>\n      <pre>2\n\n</pre>\n      <p><br></p>\n      <pre>1\n</pre>\n      <pre>0</pre>\n      <p><br></p>\n      <pre>1\n</pre>\n      <pre>1\n</pre>\n      <p><br></p>\n      <pre>1\n</pre>\n      <pre>2\n\n</pre>\n      <p><br></p>\n      <pre>2\n\n</pre>\n      <pre>0</pre>\n      <p><br></p>\n      <pre>2\n\n</pre>\n      <pre>1\n</pre>\n      <p><br></p>\n      <pre>2\n\n</pre>\n      <pre>2\n\n</pre>\n    ');
+    editor.scroll.lines().forEach(function (line) {
+      line.optimize();
+    });
+    expect(editor.scroll.domNode).toEqualHTML('\n      <pre>0\n0\n</pre>\n      <p><br></p>\n      <pre>0\n1\n</pre>\n      <p><br></p>\n      <pre>0\n2\n\n</pre>\n      <p><br></p>\n      <pre>1\n0\n</pre>\n      <p><br></p>\n      <pre>1\n1\n</pre>\n      <p><br></p>\n      <pre>1\n2\n\n</pre>\n      <p><br></p>\n      <pre>2\n\n0\n</pre>\n      <p><br></p>\n      <pre>2\n\n1\n</pre>\n      <p><br></p>\n      <pre>2\n\n2\n\n</pre>\n    ');
+  });
+
+  it('merge multiple', function () {
+    var editor = this.initialize(_editor2.default, '\n      <pre>0</pre>\n      <pre>1</pre>\n      <pre>2</pre>\n      <pre>3</pre>\n    ');
+    editor.scroll.children.head.optimize();
+    expect(editor.scroll.domNode).toEqualHTML('\n      <pre>0\n1\n2\n3\n</pre>\n    ');
+  });
+
+  it('add', function () {
+    var editor = this.initialize(_editor2.default, '<p><em>0123</em></p><p>5678</p>');
+    editor.formatLine(2, 5, { 'code-block': true });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123').insert('\n', { 'code-block': true }).insert('5678').insert('\n', { 'code-block': true }));
+    expect(editor.scroll.domNode.innerHTML).toEqual('<pre spellcheck="false">0123\n5678\n</pre>');
+  });
+
+  it('remove', function () {
+    var editor = this.initialize(_editor2.default, { html: '<pre>0123\n</pre>' });
+    editor.formatText(4, 1, { 'code-block': false });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123\n'));
+    expect(editor.scroll.domNode).toEqualHTML('<p>0123</p>');
+  });
+
+  it('delete last', function () {
+    var editor = this.initialize(_editor2.default, { html: '<p>0123</p><pre>\n</pre><p>5678</p>' });
+    editor.deleteText(4, 1);
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123').insert('\n', { 'code-block': true }).insert('5678\n'));
+    expect(editor.scroll.domNode).toEqualHTML('<pre>0123</pre><p>5678</p>');
+  });
+
+  it('delete merge before', function () {
+    var editor = this.initialize(_editor2.default, { html: '<h1>0123</h1><pre>4567\n</pre>' });
+    editor.deleteText(4, 1);
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('01234567').insert('\n', { 'code-block': true }));
+    expect(editor.scroll.domNode).toEqualHTML('<pre>01234567\n</pre>');
+  });
+
+  it('delete merge after', function () {
+    var editor = this.initialize(_editor2.default, { html: '<pre>0123\n</pre><h1>4567</h1>' });
+    editor.deleteText(4, 1);
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('01234567').insert('\n', { header: 1 }));
+    expect(editor.scroll.domNode).toEqualHTML('<h1>01234567</h1>');
+  });
+
+  it('delete across before partial merge', function () {
+    var editor = this.initialize(_editor2.default, { html: '<pre>01\n34\n67\n</pre><h1>90</h1>' });
+    editor.deleteText(7, 3);
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('01').insert('\n', { 'code-block': true }).insert('34').insert('\n', { 'code-block': true }).insert('60').insert('\n', { header: 1 }));
+    expect(editor.scroll.domNode.innerHTML).toEqualHTML('<pre>01\n34\n</pre><h1>60</h1>');
+  });
+
+  it('delete across before no merge', function () {
+    var editor = this.initialize(_editor2.default, { html: '<pre>01\n34\n</pre><h1>6789</h1>' });
+    editor.deleteText(3, 5);
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('01').insert('\n', { 'code-block': true }).insert('89').insert('\n', { header: 1 }));
+    expect(editor.scroll.domNode.innerHTML).toEqualHTML('<pre>01\n</pre><h1>89</h1>');
+  });
+
+  it('delete across after', function () {
+    var editor = this.initialize(_editor2.default, { html: '<h1>0123</h1><pre>56\n89\n</pre>' });
+    editor.deleteText(2, 4);
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('016').insert('\n', { 'code-block': true }).insert('89').insert('\n', { 'code-block': true }));
+    expect(editor.scroll.domNode.innerHTML).toEqualHTML('<pre>016\n89\n</pre>');
+  });
+
+  it('replace', function () {
+    var editor = this.initialize(_editor2.default, { html: '<pre>0123\n</pre>' });
+    editor.formatText(4, 1, { 'header': 1 });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123').insert('\n', { header: 1 }));
+    expect(editor.scroll.domNode).toEqualHTML('<h1>0123</h1>');
+  });
+
+  it('replace multiple', function () {
+    var editor = this.initialize(_editor2.default, { html: '<pre>01\n23\n</pre>' });
+    editor.formatText(0, 6, { 'header': 1 });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('01').insert('\n', { header: 1 }).insert('23').insert('\n', { header: 1 }));
+    expect(editor.scroll.domNode).toEqualHTML('<h1>01</h1><h1>23</h1>');
+  });
+
+  it('format interior line', function () {
+    var editor = this.initialize(_editor2.default, { html: '<pre>01\n23\n45\n</pre>' });
+    editor.formatText(5, 1, { 'header': 1 });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('01').insert('\n', { 'code-block': true }).insert('23').insert('\n', { 'header': 1 }).insert('45').insert('\n', { 'code-block': true }));
+    expect(editor.scroll.domNode.innerHTML).toEqual('<pre>01\n</pre><h1>23</h1><pre>45\n</pre>');
+  });
+
+  it('format imprecise bounds', function () {
+    var editor = this.initialize(_editor2.default, { html: '<pre>01\n23\n45\n</pre>' });
+    editor.formatText(1, 6, { 'header': 1 });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('01').insert('\n', { 'header': 1 }).insert('23').insert('\n', { 'header': 1 }).insert('45').insert('\n', { 'code-block': true }));
+    expect(editor.scroll.domNode.innerHTML).toEqual('<h1>01</h1><h1>23</h1><pre>45\n</pre>');
+  });
+
+  it('format without newline', function () {
+    var editor = this.initialize(_editor2.default, { html: '<pre>01\n23\n45\n</pre>' });
+    editor.formatText(3, 1, { 'header': 1 });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('01').insert('\n', { 'code-block': true }).insert('23').insert('\n', { 'code-block': true }).insert('45').insert('\n', { 'code-block': true }));
+    expect(editor.scroll.domNode.innerHTML).toEqual('<pre>01\n23\n45\n</pre>');
+  });
+
+  it('format line', function () {
+    var editor = this.initialize(_editor2.default, { html: '<pre>01\n23\n45\n</pre>' });
+    editor.formatLine(3, 1, { 'header': 1 });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('01').insert('\n', { 'code-block': true }).insert('23').insert('\n', { 'header': 1 }).insert('45').insert('\n', { 'code-block': true }));
+    expect(editor.scroll.domNode.innerHTML).toEqual('<pre>01\n</pre><h1>23</h1><pre>45\n</pre>');
+  });
+
+  it('ignore formatAt', function () {
+    var editor = this.initialize(_editor2.default, '<pre>0123</pre>');
+    editor.formatText(1, 1, { bold: true });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123').insert('\n', { 'code-block': true }));
+    expect(editor.scroll.domNode).toEqualHTML('<pre>0123</pre>');
+  });
+
+  it('partial block modification applyDelta', function () {
+    var editor = this.initialize(_editor2.default, { html: '<pre>a\nb\n\n</pre>' });
+    var delta = new _quillDelta2.default().retain(3).insert('\n', { 'code-block': true }).delete(1).retain(1, { 'code-block': null });
+    editor.applyDelta(delta);
+    expect(editor.scroll.domNode.innerHTML).toEqual('<pre>a\nb\n</pre><p><br></p>');
+  });
+});
+
+/***/ }),
+/* 128 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _quillDelta = __webpack_require__(2);
+
+var _quillDelta2 = _interopRequireDefault(_quillDelta);
+
+var _editor = __webpack_require__(14);
+
+var _editor2 = _interopRequireDefault(_editor);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+describe('Header', function () {
+  it('add', function () {
+    var editor = this.initialize(_editor2.default, '<p><em>0123</em></p>');
+    editor.formatText(4, 1, { header: 1 });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123', { italic: true }).insert('\n', { header: 1 }));
+    expect(editor.scroll.domNode).toEqualHTML('<h1><em>0123</em></h1>');
+  });
+
+  it('remove', function () {
+    var editor = this.initialize(_editor2.default, '<h1><em>0123</em></h1>');
+    editor.formatText(4, 1, { header: false });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123', { italic: true }).insert('\n'));
+    expect(editor.scroll.domNode).toEqualHTML('<p><em>0123</em></p>');
+  });
+
+  it('change', function () {
+    var editor = this.initialize(_editor2.default, '<h1><em>0123</em></h1>');
+    editor.formatText(4, 1, { header: 2 });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123', { italic: true }).insert('\n', { header: 2 }));
+    expect(editor.scroll.domNode).toEqualHTML('<h2><em>0123</em></h2>');
+  });
+});
+
+/***/ }),
+/* 129 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _quillDelta = __webpack_require__(2);
+
+var _quillDelta2 = _interopRequireDefault(_quillDelta);
+
+var _editor = __webpack_require__(14);
+
+var _editor2 = _interopRequireDefault(_editor);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+describe('Indent', function () {
+  it('+1', function () {
+    var editor = this.initialize(_editor2.default, '<ul><li>0123</li></ul>');
+    editor.formatText(4, 1, { 'indent': '+1' });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123').insert('\n', { list: 'bullet', indent: 1 }));
+    expect(editor.scroll.domNode).toEqualHTML('<ul><li class="ql-indent-1">0123</li></ul>');
+  });
+
+  it('-1', function () {
+    var editor = this.initialize(_editor2.default, '<ul><li class="ql-indent-1">0123</li></ul>');
+    editor.formatText(4, 1, { 'indent': '-1' });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123').insert('\n', { list: 'bullet' }));
+    expect(editor.scroll.domNode).toEqualHTML('<ul><li>0123</li></ul>');
+  });
+});
+
+/***/ }),
+/* 130 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _quillDelta = __webpack_require__(2);
+
+var _quillDelta2 = _interopRequireDefault(_quillDelta);
+
+var _editor = __webpack_require__(14);
+
+var _editor2 = _interopRequireDefault(_editor);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+describe('List', function () {
+  it('add', function () {
+    var editor = this.initialize(_editor2.default, '\n      <p>0123</p>\n      <p>5678</p>\n      <p>0123</p>');
+    editor.formatText(9, 1, { list: 'ordered' });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123\n5678').insert('\n', { list: 'ordered' }).insert('0123\n'));
+    expect(this.container).toEqualHTML('\n      <p>0123</p>\n      <ol><li>5678</li></ol>\n      <p>0123</p>\n    ');
+  });
+
+  it('checklist', function () {
+    var editor = this.initialize(_editor2.default, '\n      <p>0123</p>\n      <p>5678</p>\n      <p>0123</p>\n    ');
+    editor.scroll.domNode.classList.add('ql-editor');
+    editor.formatText(4, 1, { list: 'checked' });
+    editor.formatText(9, 1, { list: 'unchecked' });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123').insert('\n', { list: 'checked' }).insert('5678').insert('\n', { list: 'unchecked' }).insert('0123\n'));
+    expect(this.container).toEqualHTML('\n      <ul data-checked="true">\n        <li>0123</li>\n      </ul>\n      <ul data-checked="false">\n        <li>5678</li>\n      </ul>\n      <p>0123</p>\n    ');
+  });
+
+  it('remove', function () {
+    var editor = this.initialize(_editor2.default, '\n      <p>0123</p>\n      <ol><li>5678</li></ol>\n      <p>0123</p>\n    ');
+    editor.formatText(9, 1, { list: null });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123\n5678\n0123\n'));
+    expect(this.container).toEqualHTML('\n      <p>0123</p>\n      <p>5678</p>\n      <p>0123</p>\n    ');
+  });
+
+  it('replace', function () {
+    var editor = this.initialize(_editor2.default, '\n      <p>0123</p>\n      <ol><li>5678</li></ol>\n      <p>0123</p>\n    ');
+    editor.formatText(9, 1, { list: 'bullet' });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123\n5678').insert('\n', { list: 'bullet' }).insert('0123\n'));
+    expect(this.container).toEqualHTML('\n      <p>0123</p>\n      <ul><li>5678</li></ul>\n      <p>0123</p>\n    ');
+  });
+
+  it('replace checklist with bullet', function () {
+    var editor = this.initialize(_editor2.default, '\n      <ul data-checked="true">\n        <li>0123</li>\n      </ul>\n    ');
+    editor.formatText(4, 1, { list: 'bullet' });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123').insert('\n', { list: 'bullet' }));
+    expect(this.container).toEqualHTML('\n      <ul><li>0123</li></ul>\n    ');
+  });
+
+  it('replace with attributes', function () {
+    var editor = this.initialize(_editor2.default, '<ol><li class="ql-align-center">0123</li></ol>');
+    editor.formatText(4, 1, { list: 'bullet' });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123').insert('\n', { align: 'center', list: 'bullet' }));
+    expect(this.container).toEqualHTML('<ul><li class="ql-align-center">0123</li></ul>');
+  });
+
+  it('format merge', function () {
+    var editor = this.initialize(_editor2.default, '\n      <ol><li>0123</li></ol>\n      <p>5678</p>\n      <ol><li>0123</li></ol>\n    ');
+    editor.formatText(9, 1, { list: 'ordered' });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123').insert('\n', { list: 'ordered' }).insert('5678').insert('\n', { list: 'ordered' }).insert('0123').insert('\n', { list: 'ordered' }));
+    expect(this.container).toEqualHTML('\n      <ol>\n        <li>0123</li>\n        <li>5678</li>\n        <li>0123</li>\n      </ol>');
+  });
+
+  it('replace merge', function () {
+    var editor = this.initialize(_editor2.default, '\n      <ol><li>0123</li></ol>\n      <ul><li>5678</li></ul>\n      <ol><li>0123</li></ol>');
+    editor.formatText(9, 1, { list: 'ordered' });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123').insert('\n', { list: 'ordered' }).insert('5678').insert('\n', { list: 'ordered' }).insert('0123').insert('\n', { list: 'ordered' }));
+    expect(this.container).toEqualHTML('\n      <ol>\n        <li>0123</li>\n        <li>5678</li>\n        <li>0123</li>\n      </ol>');
+  });
+
+  it('delete merge', function () {
+    var editor = this.initialize(_editor2.default, '\n      <ol><li>0123</li></ol>\n      <p>5678</p>\n      <ol><li>0123</li></ol>');
+    editor.deleteText(5, 5);
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123').insert('\n', { list: 'ordered' }).insert('0123').insert('\n', { list: 'ordered' }));
+    expect(this.container).toEqualHTML('\n      <ol>\n        <li>0123</li>\n        <li>0123</li>\n      </ol>');
+  });
+
+  it('merge checklist', function () {
+    var editor = this.initialize(_editor2.default, '\n      <ul data-checked="true"><li>0123</li></ul>\n      <p>5678</p>\n      <ul data-checked="true"><li>0123</li></ul>\n    ');
+    editor.formatText(9, 1, { list: 'checked' });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123').insert('\n', { list: 'checked' }).insert('5678').insert('\n', { list: 'checked' }).insert('0123').insert('\n', { list: 'checked' }));
+    expect(this.container).toEqualHTML('\n      <ul data-checked="true">\n        <li>0123</li>\n        <li>5678</li>\n        <li>0123</li>\n      </ul>');
+  });
+
+  it('replace split', function () {
+    var editor = this.initialize(_editor2.default, '\n      <ol>\n        <li>0123</li>\n        <li>5678</li>\n        <li>0123</li>\n      </ol>');
+    editor.formatText(9, 1, { list: 'bullet' });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123').insert('\n', { list: 'ordered' }).insert('5678').insert('\n', { list: 'bullet' }).insert('0123').insert('\n', { list: 'ordered' }));
+    expect(this.container).toEqualHTML('\n      <ol><li>0123</li></ol>\n      <ul><li>5678</li></ul>\n      <ol><li>0123</li></ol>');
+  });
+
+  it('split checklist', function () {
+    var editor = this.initialize(_editor2.default, '\n      <ul>\n        <li>0123</li>\n        <li>5678</li>\n        <li>0123</li>\n      </ul>');
+    editor.formatText(9, 1, { list: 'unchecked' });
+    expect(editor.getDelta()).toEqual(new _quillDelta2.default().insert('0123').insert('\n', { list: 'bullet' }).insert('5678').insert('\n', { list: 'unchecked' }).insert('0123').insert('\n', { list: 'bullet' }));
+    expect(this.container).toEqualHTML('\n      <ul><li>0123</li></ul>\n      <ul data-checked="false"><li>5678</li></ul>\n      <ul><li>0123</li></ul>');
+  });
+
+  it('empty line interop', function () {
+    var editor = this.initialize(_editor2.default, '<ol><li><br></li></ol>');
+    editor.insertText(0, 'Test');
+    expect(this.container).toEqualHTML('<ol><li>Test</li></ol>');
+    editor.deleteText(0, 4);
+    expect(this.container).toEqualHTML('<ol><li><br></li></ol>');
+  });
+
+  it('delete multiple items', function () {
+    var editor = this.initialize(_editor2.default, '\n      <ol>\n        <li>0123</li>\n        <li>5678</li>\n        <li>0123</li>\n      </ol>');
+    editor.deleteText(2, 5);
+    expect(this.container).toEqualHTML('\n      <ol>\n        <li>0178</li>\n        <li>0123</li>\n      </ol>');
+  });
+
+  it('delete across last item', function () {
+    var editor = this.initialize(_editor2.default, '\n      <ol><li>0123</li></ol>\n      <p>5678</p>');
+    editor.deleteText(2, 5);
+    expect(this.container).toEqualHTML('<p>0178</p>');
+  });
+
+  it('delete partial', function () {
+    var editor = this.initialize(_editor2.default, '<p>0123</p><ul><li>5678</li></ul>');
+    editor.deleteText(2, 5);
+    expect(this.container).toEqualHTML('<ul><li>0178</li></ul>');
+  });
+
+  it('nested list replacement', function () {
+    var editor = this.initialize(_editor2.default, '\n      <ol>\n        <li>One</li>\n        <li class=\'ql-indent-1\'>Alpha</li>\n        <li>Two</li>\n      </ol>\n    ');
+    editor.formatLine(1, 10, { list: 'bullet' });
+    expect(this.container).toEqualHTML('\n      <ul>\n        <li>One</li>\n        <li class=\'ql-indent-1\'>Alpha</li>\n        <li>Two</li>\n      </ul>\n    ');
+  });
+
+  it('copy atttributes', function () {
+    var editor = this.initialize(_editor2.default, '<p class="ql-align-center">Test</p>');
+    editor.formatLine(4, 1, { list: 'bullet' });
+    expect(this.container).toEqualHTML('<ul><li class="ql-align-center">Test</li></ul>');
+  });
+
+  it('insert block embed', function () {
+    var editor = this.initialize(_editor2.default, '<ol><li>Test</li></ol>');
+    editor.insertEmbed(2, 'video', 'https://www.youtube.com/embed/QHH3iSeDBLo?showinfo=0');
+    expect(this.container).toEqualHTML('\n      <ol><li>Te</li></ol>\n      <iframe class="ql-video" frameborder="0" allowfullscreen="true" src="https://www.youtube.com/embed/QHH3iSeDBLo?showinfo=0"></iframe>\n      <ol><li>st</li></ol>\n    ');
+  });
+
+  it('insert block embed at beginning', function () {
+    var editor = this.initialize(_editor2.default, '<ol><li>Test</li></ol>');
+    editor.insertEmbed(0, 'video', 'https://www.youtube.com/embed/QHH3iSeDBLo?showinfo=0');
+    expect(this.container).toEqualHTML('\n      <iframe class="ql-video" frameborder="0" allowfullscreen="true" src="https://www.youtube.com/embed/QHH3iSeDBLo?showinfo=0"></iframe>\n      <ol><li>Test</li></ol>\n    ');
+  });
+
+  it('insert block embed at end', function () {
+    var editor = this.initialize(_editor2.default, '<ol><li>Test</li></ol>');
+    editor.insertEmbed(4, 'video', 'https://www.youtube.com/embed/QHH3iSeDBLo?showinfo=0');
+    expect(this.container).toEqualHTML('\n      <ol><li>Test</li></ol>\n      <iframe class="ql-video" frameborder="0" allowfullscreen="true" src="https://www.youtube.com/embed/QHH3iSeDBLo?showinfo=0"></iframe>\n      <ol><li><br></li></ol>\n    ');
+  });
+});
+
+/***/ }),
+/* 131 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _scroll = __webpack_require__(22);
+
+var _scroll2 = _interopRequireDefault(_scroll);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+describe('Bold', function () {
+  it('optimize and merge', function () {
+    var scroll = this.initialize(_scroll2.default, '<p><strong>a</strong>b<strong>c</strong></p>');
+    var bold = document.createElement('b');
+    bold.appendChild(scroll.domNode.firstChild.childNodes[1]);
+    scroll.domNode.firstChild.insertBefore(bold, scroll.domNode.firstChild.lastChild);
+    scroll.update();
+    expect(scroll.domNode).toEqualHTML('<p><strong>abc</strong></p>');
+  });
+});
+
+/***/ }),
+/* 132 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _quillDelta = __webpack_require__(2);
+
+var _quillDelta2 = _interopRequireDefault(_quillDelta);
+
+var _selection = __webpack_require__(15);
+
+var _core = __webpack_require__(29);
+
+var _core2 = _interopRequireDefault(_core);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+describe('Clipboard', function () {
+  describe('events', function () {
+    beforeEach(function () {
+      this.quill = this.initialize(_core2.default, '<h1>0123</h1><p>5<em>67</em>8</p>');
+      this.quill.setSelection(2, 5);
+    });
+
+    it('paste', function (done) {
+      var _this = this;
+
+      this.quill.clipboard.container.innerHTML = '<strong>|</strong>';
+      this.quill.clipboard.onPaste({});
+      setTimeout(function () {
+        expect(_this.quill.root).toEqualHTML('<p>01<strong>|</strong><em>7</em>8</p>');
+        expect(_this.quill.getSelection()).toEqual(new _selection.Range(3));
+        done();
+      }, 2);
+    });
+
+    it('selection-change', function (done) {
+      var handler = {
+        change: function change() {}
+      };
+      spyOn(handler, 'change');
+      this.quill.on('selection-change', handler.change);
+      this.quill.clipboard.container.innerHTML = '0';
+      this.quill.clipboard.onPaste({});
+      setTimeout(function () {
+        expect(handler.change).not.toHaveBeenCalled();
+        done();
+      }, 2);
+    });
+  });
+
+  describe('convert', function () {
+    beforeEach(function () {
+      var quill = this.initialize(_core2.default, '');
+      this.clipboard = quill.clipboard;
+    });
+
+    it('plain text', function () {
+      var delta = this.clipboard.convert('simple plain text');
+      expect(delta).toEqual(new _quillDelta2.default().insert('simple plain text'));
+    });
+
+    it('whitespace', function () {
+      var html = '<div> 0 </div><div> <div> 1 2 <span> 3 </span> 4 </div> </div>' + '<div><span>5 </span><span>6 </span><span> 7</span><span> 8</span></div>';
+      var delta = this.clipboard.convert(html);
+      expect(delta).toEqual(new _quillDelta2.default().insert('0\n1 2  3  4\n5 6  7 8'));
+    });
+
+    it('inline whitespace', function () {
+      var html = '<p>0 <strong>1</strong> 2</p>';
+      var delta = this.clipboard.convert(html);
+      expect(delta).toEqual(new _quillDelta2.default().insert('0 ').insert('1', { bold: true }).insert(' 2'));
+    });
+
+    it('intentional whitespace', function () {
+      var html = '<span>0&nbsp;<strong>1</strong>&nbsp;2</span>';
+      var delta = this.clipboard.convert(html);
+      expect(delta).toEqual(new _quillDelta2.default().insert('0\xA0').insert('1', { bold: true }).insert('\xA02'));
+    });
+
+    it('consecutive intentional whitespace', function () {
+      var html = '<strong>&nbsp;&nbsp;1&nbsp;&nbsp;</strong>';
+      var delta = this.clipboard.convert(html);
+      expect(delta).toEqual(new _quillDelta2.default().insert('\xA0\xA01\xA0\xA0', { bold: true }));
+    });
+
+    it('break', function () {
+      var html = '<div>0<br>1</div><div>2<br></div><div>3</div><div><br>4</div><div><br></div><div>5</div>';
+      var delta = this.clipboard.convert(html);
+      expect(delta).toEqual(new _quillDelta2.default().insert('0\n1\n2\n3\n\n4\n\n5'));
+    });
+
+    it('mixed inline and block', function () {
+      var delta = this.clipboard.convert('<div>One<div>Two</div></div>');
+      expect(delta).toEqual(new _quillDelta2.default().insert('One\nTwo'));
+    });
+
+    it('alias', function () {
+      var delta = this.clipboard.convert('<b>Bold</b><i>Italic</i>');
+      expect(delta).toEqual(new _quillDelta2.default().insert('Bold', { bold: true }).insert('Italic', { italic: true }));
+    });
+
+    it('pre', function () {
+      var html = '<div style="white-space: pre;"> 01 \n 23 </div>';
+      var delta = this.clipboard.convert(html);
+      expect(delta).toEqual(new _quillDelta2.default().insert(' 01 \n 23 '));
+    });
+
+    it('nested list', function () {
+      var delta = this.clipboard.convert('<ol><li>One</li><li class="ql-indent-1">Alpha</li></ol>');
+      expect(delta).toEqual(new _quillDelta2.default().insert('One\n', { list: 'ordered' }).insert('Alpha\n', { list: 'ordered', indent: 1 }));
+    });
+
+    it('html nested list', function () {
+      var delta = this.clipboard.convert('<ol><li>One<ol><li>Alpha</li><li>Beta</li></ol></li></ol>');
+      expect(delta).toEqual(new _quillDelta2.default().insert('One\nAlpha', { list: 'ordered' }).insert('\n', { list: 'ordered', indent: 1 }).insert('Beta', { list: 'ordered' }).insert('\n', { list: 'ordered', indent: 1 }));
+    });
+
+    it('embeds', function () {
+      var delta = this.clipboard.convert('<div>01<img src="/assets/favicon.png" height="200" width="300">34</div>');
+      var expected = new _quillDelta2.default().insert('01').insert({ image: '/assets/favicon.png' }, { height: '200', width: '300' }).insert('34');
+      expect(delta).toEqual(expected);
+    });
+
+    it('block embed', function () {
+      var delta = this.clipboard.convert('<p>01</p><iframe src="#"></iframe><p>34</p>');
+      expect(delta).toEqual(new _quillDelta2.default().insert('01\n').insert({ video: '#' }).insert('34'));
+    });
+
+    it('attributor and style match', function () {
+      var delta = this.clipboard.convert('<p style="direction:rtl;">Test</p>');
+      expect(delta).toEqual(new _quillDelta2.default().insert('Test\n', { direction: 'rtl' }));
+    });
+
+    it('nested styles', function () {
+      var delta = this.clipboard.convert('<span style="color: red;"><span style="color: blue;">Test</span></span>');
+      expect(delta).toEqual(new _quillDelta2.default().insert('Test', { color: 'blue' }));
+    });
+
+    it('custom matcher', function () {
+      this.clipboard.addMatcher(Node.TEXT_NODE, function (node, delta) {
+        var index = 0;
+        var regex = /https?:\/\/[^\s]+/g;
+        var match = null;
+        var composer = new _quillDelta2.default();
+        while ((match = regex.exec(node.data)) !== null) {
+          composer.retain(match.index - index);
+          index = regex.lastIndex;
+          composer.retain(match[0].length, { link: match[0] });
+        }
+        return delta.compose(composer);
+      });
+      var delta = this.clipboard.convert('http://github.com https://quilljs.com');
+      var expected = new _quillDelta2.default().insert('http://github.com', { link: 'http://github.com' }).insert(' ').insert('https://quilljs.com', { link: 'https://quilljs.com' });
+      expect(delta).toEqual(expected);
+    });
+  });
+});
+
+/***/ }),
+/* 133 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _quillDelta = __webpack_require__(2);
+
+var _quillDelta2 = _interopRequireDefault(_quillDelta);
+
+var _core = __webpack_require__(29);
+
+var _core2 = _interopRequireDefault(_core);
+
+var _history = __webpack_require__(42);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+describe('History', function () {
+  describe('getLastChangeIndex', function () {
+    it('delete', function () {
+      var delta = new _quillDelta2.default().retain(4).delete(2);
+      expect((0, _history.getLastChangeIndex)(delta)).toEqual(4);
+    });
+
+    it('delete with inserts', function () {
+      var delta = new _quillDelta2.default().retain(4).insert('test').delete(2);
+      expect((0, _history.getLastChangeIndex)(delta)).toEqual(8);
+    });
+
+    it('insert text', function () {
+      var delta = new _quillDelta2.default().retain(4).insert('testing');
+      expect((0, _history.getLastChangeIndex)(delta)).toEqual(11);
+    });
+
+    it('insert embed', function () {
+      var delta = new _quillDelta2.default().retain(4).insert({ image: true });
+      expect((0, _history.getLastChangeIndex)(delta)).toEqual(5);
+    });
+
+    it('insert with deletes', function () {
+      var delta = new _quillDelta2.default().retain(4).delete(3).insert('!');
+      expect((0, _history.getLastChangeIndex)(delta)).toEqual(5);
+    });
+
+    it('format', function () {
+      var delta = new _quillDelta2.default().retain(4).retain(3, { bold: true });
+      expect((0, _history.getLastChangeIndex)(delta)).toEqual(7);
+    });
+
+    it('format newline', function () {
+      var delta = new _quillDelta2.default().retain(4).retain(1, { align: 'left' });
+      expect((0, _history.getLastChangeIndex)(delta)).toEqual(4);
+    });
+
+    it('format mixed', function () {
+      var delta = new _quillDelta2.default().retain(4).retain(1, { align: 'left', bold: true });
+      expect((0, _history.getLastChangeIndex)(delta)).toEqual(4);
+    });
+
+    it('insert newline', function () {
+      var delta = new _quillDelta2.default().retain(4).insert('a\n');
+      expect((0, _history.getLastChangeIndex)(delta)).toEqual(5);
+    });
+
+    it('mutliple newline inserts', function () {
+      var delta = new _quillDelta2.default().retain(4).insert('ab\n\n');
+      expect((0, _history.getLastChangeIndex)(delta)).toEqual(7);
+    });
+  });
+
+  describe('undo/redo', function () {
+    beforeEach(function () {
+      this.initialize(HTMLElement, '<div><p>The lazy fox</p></div>');
+      this.quill = new _core2.default(this.container.firstChild, {
+        modules: {
+          'history': { delay: 400 }
+        }
+      });
+      this.original = this.quill.getContents();
+    });
+
+    it('limits undo stack size', function () {
+      var quill = new _core2.default(this.container.firstChild, {
+        modules: {
+          history: { delay: 0, maxStack: 2 }
+        }
+      });
+      ['A', 'B', 'C'].forEach(function (text) {
+        quill.insertText(0, text);
+      });
+      expect(quill.history.stack.undo.length).toEqual(2);
+    });
+
+    it('user change', function () {
+      this.quill.root.firstChild.innerHTML = 'The lazy foxes';
+      this.quill.update();
+      var changed = this.quill.getContents();
+      expect(changed).not.toEqual(this.original);
+      this.quill.history.undo();
+      expect(this.quill.getContents()).toEqual(this.original);
+      this.quill.history.redo();
+      expect(this.quill.getContents()).toEqual(changed);
+    });
+
+    it('merge changes', function () {
+      expect(this.quill.history.stack.undo.length).toEqual(0);
+      this.quill.updateContents(new _quillDelta2.default().retain(12).insert('e'));
+      expect(this.quill.history.stack.undo.length).toEqual(1);
+      this.quill.updateContents(new _quillDelta2.default().retain(13).insert('s'));
+      expect(this.quill.history.stack.undo.length).toEqual(1);
+      this.quill.history.undo();
+      expect(this.quill.getContents()).toEqual(this.original);
+      expect(this.quill.history.stack.undo.length).toEqual(0);
+    });
+
+    it('dont merge changes', function (done) {
+      var _this = this;
+
+      expect(this.quill.history.stack.undo.length).toEqual(0);
+      this.quill.updateContents(new _quillDelta2.default().retain(12).insert('e'));
+      expect(this.quill.history.stack.undo.length).toEqual(1);
+      setTimeout(function () {
+        _this.quill.updateContents(new _quillDelta2.default().retain(13).insert('s'));
+        expect(_this.quill.history.stack.undo.length).toEqual(2);
+        done();
+      }, this.quill.history.options.delay * 1.25);
+    });
+
+    it('multiple undos', function (done) {
+      var _this2 = this;
+
+      expect(this.quill.history.stack.undo.length).toEqual(0);
+      this.quill.updateContents(new _quillDelta2.default().retain(12).insert('e'));
+      var contents = this.quill.getContents();
+      setTimeout(function () {
+        _this2.quill.updateContents(new _quillDelta2.default().retain(13).insert('s'));
+        _this2.quill.history.undo();
+        expect(_this2.quill.getContents()).toEqual(contents);
+        _this2.quill.history.undo();
+        expect(_this2.quill.getContents()).toEqual(_this2.original);
+        done();
+      }, this.quill.history.options.delay * 1.25);
+    });
+
+    it('transform api change', function () {
+      this.quill.history.options.userOnly = true;
+      this.quill.updateContents(new _quillDelta2.default().retain(12).insert('es'), _core2.default.sources.USER);
+      this.quill.history.lastRecorded = 0;
+      this.quill.updateContents(new _quillDelta2.default().retain(14).insert('!'), _core2.default.sources.USER);
+      this.quill.history.undo();
+      this.quill.updateContents(new _quillDelta2.default().retain(4).delete(5), _core2.default.sources.API);
+      expect(this.quill.getContents()).toEqual(new _quillDelta2.default().insert('The foxes\n'));
+      this.quill.history.undo();
+      expect(this.quill.getContents()).toEqual(new _quillDelta2.default().insert('The fox\n'));
+      this.quill.history.redo();
+      expect(this.quill.getContents()).toEqual(new _quillDelta2.default().insert('The foxes\n'));
+      this.quill.history.redo();
+      expect(this.quill.getContents()).toEqual(new _quillDelta2.default().insert('The foxes!\n'));
+    });
+
+    it('transform preserve intention', function () {
+      var url = 'https://www.google.com/';
+      this.quill.history.options.userOnly = true;
+      this.quill.updateContents(new _quillDelta2.default().insert(url, { link: url }), _core2.default.sources.USER);
+      this.quill.history.lastRecorded = 0;
+      this.quill.updateContents(new _quillDelta2.default().delete(url.length).insert('Google', { link: url }), _core2.default.sources.API);
+      this.quill.history.lastRecorded = 0;
+      this.quill.updateContents(new _quillDelta2.default().retain(this.quill.getLength() - 1).insert('!'), _core2.default.sources.USER);
+      this.quill.history.lastRecorded = 0;
+      expect(this.quill.getContents()).toEqual(new _quillDelta2.default().insert('Google', { link: url }).insert('The lazy fox!\n'));
+      this.quill.history.undo();
+      expect(this.quill.getContents()).toEqual(new _quillDelta2.default().insert('Google', { link: url }).insert('The lazy fox\n'));
+      this.quill.history.undo();
+      expect(this.quill.getContents()).toEqual(new _quillDelta2.default().insert('Google', { link: url }).insert('The lazy fox\n'));
+    });
+
+    it('ignore remote changes', function () {
+      this.quill.history.options.delay = 0;
+      this.quill.history.options.userOnly = true;
+      this.quill.setText('\n');
+      this.quill.insertText(0, 'a', _core2.default.sources.USER);
+      this.quill.insertText(1, 'b', _core2.default.sources.API);
+      this.quill.insertText(2, 'c', _core2.default.sources.USER);
+      this.quill.insertText(3, 'd', _core2.default.sources.API);
+      expect(this.quill.getText()).toEqual('abcd\n');
+      this.quill.history.undo();
+      expect(this.quill.getText()).toEqual('abd\n');
+      this.quill.history.undo();
+      expect(this.quill.getText()).toEqual('bd\n');
+      this.quill.history.redo();
+      expect(this.quill.getText()).toEqual('abd\n');
+      this.quill.history.redo();
+      expect(this.quill.getText()).toEqual('abcd\n');
+    });
+  });
+});
+
+/***/ }),
+/* 134 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _keyboard = __webpack_require__(23);
+
+var _keyboard2 = _interopRequireDefault(_keyboard);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+describe('Keyboard', function () {
+  describe('match', function () {
+    it('no modifiers', function () {
+      var binding = {
+        key: 'a'
+      };
+      expect(_keyboard2.default.match({
+        keyCode: 'A'.charCodeAt(0),
+        shiftKey: false,
+        metaKey: false,
+        ctrlKey: false,
+        altKey: false
+      }, binding)).toBe(true);
+      expect(_keyboard2.default.match({
+        keyCode: 'A'.charCodeAt(0),
+        shiftKey: true,
+        metaKey: false,
+        ctrlKey: false,
+        altKey: false
+      }, binding)).toBe(false);
+    });
+
+    it('simple modifier', function () {
+      var binding = {
+        key: 'a',
+        shiftKey: true
+      };
+      expect(_keyboard2.default.match({
+        keyCode: 'A'.charCodeAt(0),
+        shiftKey: false,
+        metaKey: false,
+        ctrlKey: false,
+        altKey: false
+      }, binding)).toBe(false);
+      expect(_keyboard2.default.match({
+        keyCode: 'A'.charCodeAt(0),
+        shiftKey: true,
+        metaKey: false,
+        ctrlKey: false,
+        altKey: false
+      }, binding)).toBe(true);
+    });
+
+    it('optional modifier', function () {
+      var binding = {
+        key: 'a',
+        shiftKey: null
+      };
+      expect(_keyboard2.default.match({
+        keyCode: 'A'.charCodeAt(0),
+        shiftKey: false,
+        metaKey: false,
+        ctrlKey: false,
+        altKey: false
+      }, binding)).toBe(true);
+      expect(_keyboard2.default.match({
+        keyCode: 'A'.charCodeAt(0),
+        shiftKey: true,
+        metaKey: false,
+        ctrlKey: false,
+        altKey: false
+      }, binding)).toBe(true);
+    });
+
+    it('shortkey modifier', function () {
+      var binding = {
+        key: 'a',
+        shortKey: true
+      };
+      expect(_keyboard2.default.match({
+        keyCode: 'A'.charCodeAt(0),
+        shiftKey: false,
+        metaKey: false,
+        ctrlKey: false,
+        altKey: false
+      }, binding)).toBe(false);
+      expect(_keyboard2.default.match(_defineProperty({
+        keyCode: 'A'.charCodeAt(0),
+        shiftKey: false,
+        metaKey: false,
+        ctrlKey: false,
+        altKey: false
+      }, _keyboard.SHORTKEY, true), binding)).toBe(true);
+    });
+
+    it('native shortkey modifier', function () {
+      var binding = _defineProperty({
+        key: 'a'
+      }, _keyboard.SHORTKEY, true);
+      expect(_keyboard2.default.match({
+        keyCode: 'A'.charCodeAt(0),
+        shiftKey: false,
+        metaKey: false,
+        ctrlKey: false,
+        altKey: false
+      }, binding)).toBe(false);
+      expect(_keyboard2.default.match(_defineProperty({
+        keyCode: 'A'.charCodeAt(0),
+        shiftKey: false,
+        metaKey: false,
+        ctrlKey: false,
+        altKey: false
+      }, _keyboard.SHORTKEY, true), binding)).toBe(true);
+    });
+  });
+});
+
+/***/ }),
+/* 135 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _quill = __webpack_require__(5);
+
+var _quill2 = _interopRequireDefault(_quill);
+
+var _toolbar = __webpack_require__(57);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+describe('Toolbar', function () {
+  describe('add controls', function () {
+    it('single level', function () {
+      (0, _toolbar.addControls)(this.container, ['bold', 'italic']);
+      expect(this.container).toEqualHTML('\n        <span class="ql-formats">\n          <button type="button" class="ql-bold"></button>\n          <button type="button" class="ql-italic"></button>\n        </span>\n      ');
+    });
+
+    it('nested group', function () {
+      (0, _toolbar.addControls)(this.container, [['bold', 'italic'], ['underline', 'strike']]);
+      expect(this.container).toEqualHTML('\n        <span class="ql-formats">\n          <button type="button" class="ql-bold"></button>\n          <button type="button" class="ql-italic"></button>\n        </span>\n        <span class="ql-formats">\n          <button type="button" class="ql-underline"></button>\n          <button type="button" class="ql-strike"></button>\n        </span>\n      ');
+    });
+
+    it('button value', function () {
+      (0, _toolbar.addControls)(this.container, ['bold', { header: '2' }]);
+      expect(this.container).toEqualHTML('\n        <span class="ql-formats">\n          <button type="button" class="ql-bold"></button>\n          <button type="button" class="ql-header" value="2"></button>\n        </span>\n      ');
+    });
+
+    it('select', function () {
+      (0, _toolbar.addControls)(this.container, [{ size: ['10px', false, '18px', '32px'] }]);
+      expect(this.container).toEqualHTML('\n        <span class="ql-formats">\n          <select class="ql-size">\n            <option value="10px"></option>\n            <option selected="selected"></option>\n            <option value="18px"></option>\n            <option value="32px"></option>\n          </select>\n        </span>\n      ');
+    });
+
+    it('everything', function () {
+      (0, _toolbar.addControls)(this.container, [[{ font: [false, 'sans-serif', 'monospace'] }, { size: ['10px', false, '18px', '32px'] }], ['bold', 'italic', 'underline', 'strike'], [{ list: 'ordered' }, { list: 'bullet' }, { align: [false, 'center', 'right', 'justify'] }], ['link', 'image']]);
+      expect(this.container).toEqualHTML('\n        <span class="ql-formats">\n          <select class="ql-font">\n            <option selected="selected"></option>\n            <option value="sans-serif"></option>\n            <option value="monospace"></option>\n          </select>\n          <select class="ql-size">\n            <option value="10px"></option>\n            <option selected="selected"></option>\n            <option value="18px"></option>\n            <option value="32px"></option>\n          </select>\n        </span>\n        <span class="ql-formats">\n          <button type="button" class="ql-bold"></button>\n          <button type="button" class="ql-italic"></button>\n          <button type="button" class="ql-underline"></button>\n          <button type="button" class="ql-strike"></button>\n        </span>\n        <span class="ql-formats">\n          <button type="button" class="ql-list" value="ordered"></button>\n          <button type="button" class="ql-list" value="bullet"></button>\n          <select class="ql-align">\n            <option selected="selected"></option>\n            <option value="center"></option>\n            <option value="right"></option>\n            <option value="justify"></option>\n          </select>\n        </span>\n        <span class="ql-formats">\n          <button type="button" class="ql-link"></button>\n          <button type="button" class="ql-image"></button>\n        </span>\n      ');
+    });
+  });
+
+  describe('active', function () {
+    beforeEach(function () {
+      var container = this.initialize(HTMLElement, '\n        <p>0123</p>\n        <p><strong>5678</strong></p>\n        <p><a href="http://quilljs.com/">0123</a></p>\n        <p class="ql-align-center">5678</p>\n        <p><span class="ql-size-small">01</span><span class="ql-size-large">23</span></p>\n      ');
+      this.quill = new _quill2.default(container, {
+        modules: {
+          toolbar: [['bold', 'link'], [{ 'size': ['small', false, 'large'] }], [{ 'align': '' }, { 'align': 'center' }]]
+        },
+        theme: 'snow'
+      });
+    });
+
+    it('toggle button', function () {
+      var boldButton = this.container.parentNode.querySelector('button.ql-bold');
+      this.quill.setSelection(7);
+      expect(boldButton.classList.contains('ql-active')).toBe(true);
+      this.quill.setSelection(2);
+      expect(boldButton.classList.contains('ql-active')).toBe(false);
+    });
+
+    it('link', function () {
+      var linkButton = this.container.parentNode.querySelector('button.ql-link');
+      this.quill.setSelection(12);
+      expect(linkButton.classList.contains('ql-active')).toBe(true);
+      this.quill.setSelection(2);
+      expect(linkButton.classList.contains('ql-active')).toBe(false);
+    });
+
+    it('dropdown', function () {
+      var sizeSelect = this.container.parentNode.querySelector('select.ql-size');
+      this.quill.setSelection(21);
+      expect(sizeSelect.selectedIndex).toEqual(0);
+      this.quill.setSelection(23);
+      expect(sizeSelect.selectedIndex).toEqual(2);
+      this.quill.setSelection(21, 2);
+      expect(sizeSelect.selectedIndex).toBeLessThan(0);
+      this.quill.setSelection(2);
+      expect(sizeSelect.selectedIndex).toEqual(1);
+    });
+
+    it('custom button', function () {
+      var centerButton = this.container.parentNode.querySelector('button.ql-align[value="center"]');
+      var leftButton = this.container.parentNode.querySelector('button.ql-align[value]');
+      this.quill.setSelection(17);
+      expect(centerButton.classList.contains('ql-active')).toBe(true);
+      expect(leftButton.classList.contains('ql-active')).toBe(false);
+      this.quill.setSelection(2);
+      expect(centerButton.classList.contains('ql-active')).toBe(false);
+      expect(leftButton.classList.contains('ql-active')).toBe(true);
+      this.quill.blur();
+      expect(centerButton.classList.contains('ql-active')).toBe(false);
+      expect(leftButton.classList.contains('ql-active')).toBe(false);
+    });
+  });
+});
+
+/***/ }),
+/* 136 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _keyboard = __webpack_require__(23);
+
+var _keyboard2 = _interopRequireDefault(_keyboard);
+
+var _picker = __webpack_require__(28);
+
+var _picker2 = _interopRequireDefault(_picker);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function createKeydownEvent(keyCode) {
+  var event = void 0;
+  if (typeof Event === 'function') {
+    event = new Event('keydown', {
+      bubbles: true,
+      cancelable: true
+    });
+    Object.defineProperty(event, 'keyCode', { 'value': keyCode });
+  } else if ((typeof Event === 'undefined' ? 'undefined' : _typeof(Event)) === 'object') {
+    // IE11
+    event = document.createEvent('Event');
+    Object.defineProperty(event, 'keyCode', { 'value': keyCode });
+    event.initEvent('keydown', true, true);
+  }
+  return event;
+}
+
+describe('Picker', function () {
+  beforeEach(function () {
+    this.container.innerHTML = '<select><option selected>0</option><option value="1">1</option></select>';
+    this.pickerSelectorInstance = new _picker2.default(this.container.firstChild);
+    this.pickerSelector = this.container.querySelector('.ql-picker');
+  });
+
+  it('initialization', function () {
+    expect(this.container.querySelector('.ql-picker')).toBeTruthy();
+    expect(this.container.querySelector('.ql-active')).toBeFalsy();
+    expect(this.container.querySelector('.ql-picker-item.ql-selected').outerHTML).toEqualHTML('<span tabindex="0" role="button" class="ql-picker-item ql-selected" data-label="0"></span>');
+    expect(this.container.querySelector('.ql-picker-item:not(.ql-selected)').outerHTML).toEqualHTML('<span tabindex="0" role="button" class="ql-picker-item" data-value="1" data-label="1"></span>');
+  });
+
+  it('escape charcters', function () {
+    var select = document.createElement('select');
+    var option = document.createElement('option');
+    this.container.appendChild(select);
+    select.appendChild(option);
+    var value = '"Helvetica Neue", \'Helvetica\', sans-serif';
+    option.value = value;
+    value = value.replace(/\"/g, '\\"');
+    expect(select.querySelector('option[value="' + value + '"]')).toEqual(option);
+  });
+
+  it('label is initialized with the correct aria attributes', function () {
+    expect(this.pickerSelector.querySelector('.ql-picker-label').getAttribute('aria-expanded')).toEqual('false');
+    var optionsId = this.pickerSelector.querySelector('.ql-picker-options').id;
+    expect(this.pickerSelector.querySelector('.ql-picker-label').getAttribute('aria-controls')).toEqual(optionsId);
+  });
+
+  it('options container is initialized with the correct aria attributes', function () {
+    expect(this.pickerSelector.querySelector('.ql-picker-options').getAttribute('aria-hidden')).toEqual('true');
+
+    var ariaControlsLabel = this.pickerSelector.querySelector('.ql-picker-label').getAttribute('aria-controls');
+    expect(this.pickerSelector.querySelector('.ql-picker-options').id).toEqual(ariaControlsLabel);
+    expect(this.pickerSelector.querySelector('.ql-picker-options').tabIndex).toEqual(-1);
+  });
+
+  it('aria attributes toggle correctly when the picker is opened via enter key', function () {
+    var pickerLabel = this.pickerSelector.querySelector('.ql-picker-label');
+
+    // Select picker via enter key
+    var e = createKeydownEvent(_keyboard2.default.keys.ENTER);
+    pickerLabel.dispatchEvent(e);
+
+    expect(pickerLabel.getAttribute('aria-expanded')).toEqual('true');
+    expect(this.pickerSelector.querySelector('.ql-picker-options').getAttribute('aria-hidden')).toEqual('false');
+  });
+
+  it('aria attributes toggle correctly when the picker is opened via mousedown', function () {
+    var pickerLabel = this.pickerSelector.querySelector('.ql-picker-label');
+
+    // Select picker via enter key
+    var e = void 0;
+    if (typeof Event === 'function') {
+      e = new Event('mousedown', {
+        bubbles: true,
+        cancelable: true
+      });
+    } else if ((typeof Event === 'undefined' ? 'undefined' : _typeof(Event)) === 'object') {
+      // IE11
+      e = document.createEvent('Event');
+      e.initEvent('mousedown', true, true);
+    }
+
+    pickerLabel.dispatchEvent(e);
+
+    expect(pickerLabel.getAttribute('aria-expanded')).toEqual('true');
+    expect(this.pickerSelector.querySelector('.ql-picker-options').getAttribute('aria-hidden')).toEqual('false');
+  });
+
+  it('aria attributes toggle correctly when an item is selected via click', function () {
+    var pickerLabel = this.pickerSelector.querySelector('.ql-picker-label');
+    pickerLabel.click();
+
+    var pickerItem = this.pickerSelector.querySelector('.ql-picker-item');
+    pickerItem.click();
+
+    expect(pickerLabel.getAttribute('aria-expanded')).toEqual('false');
+    expect(this.pickerSelector.querySelector('.ql-picker-options').getAttribute('aria-hidden')).toEqual('true');
+    expect(pickerLabel.textContent.trim()).toEqual(pickerItem.textContent.trim());
+  });
+
+  it('aria attributes toggle correctly when an item is selected via enter', function () {
+    var pickerLabel = this.pickerSelector.querySelector('.ql-picker-label');
+    pickerLabel.click();
+
+    var pickerItem = this.pickerSelector.querySelector('.ql-picker-item');
+    // Select picker item via enter key
+    var e = createKeydownEvent(_keyboard2.default.keys.ENTER);
+    pickerItem.dispatchEvent(e);
+
+    expect(pickerLabel.getAttribute('aria-expanded')).toEqual('false');
+    expect(this.pickerSelector.querySelector('.ql-picker-options').getAttribute('aria-hidden')).toEqual('true');
+    expect(pickerLabel.textContent.trim()).toEqual(pickerItem.textContent.trim());
+  });
+
+  it('aria attributes toggle correctly when the picker is closed via clicking on the label again', function () {
+    var pickerLabel = this.pickerSelector.querySelector('.ql-picker-label');
+    pickerLabel.click();
+    pickerLabel.click();
+    expect(pickerLabel.getAttribute('aria-expanded')).toEqual('false');
+    expect(this.pickerSelector.querySelector('.ql-picker-options').getAttribute('aria-hidden')).toEqual('true');
+  });
+
+  it('aria attributes toggle correctly when the picker is closed via escaping out of it', function () {
+    var pickerLabel = this.pickerSelector.querySelector('.ql-picker-label');
+    pickerLabel.click();
+
+    // Escape out of the picker
+    var e = createKeydownEvent(_keyboard2.default.keys.ESCAPE);
+    pickerLabel.dispatchEvent(e);
+
+    expect(pickerLabel.getAttribute('aria-expanded')).toEqual('false');
+    expect(this.pickerSelector.querySelector('.ql-picker-options').getAttribute('aria-hidden')).toEqual('true');
+  });
+
+  afterEach(function () {
+    this.pickerSelectorInstance = null;
+  });
+});
+
+/***/ }),
+/* 137 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _core = __webpack_require__(29);
+
+var _core2 = _interopRequireDefault(_core);
+
+var _base = __webpack_require__(43);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Tooltip = function (_BaseTooltip) {
+  _inherits(Tooltip, _BaseTooltip);
+
+  function Tooltip() {
+    _classCallCheck(this, Tooltip);
+
+    return _possibleConstructorReturn(this, (Tooltip.__proto__ || Object.getPrototypeOf(Tooltip)).apply(this, arguments));
+  }
+
+  return Tooltip;
+}(_base.BaseTooltip);
+
+Tooltip.TEMPLATE = '<input type="text">';
+
+describe('BaseTooltip', function () {
+  describe('save', function () {
+    beforeEach(function () {
+      this.quill = this.initialize(_core2.default, '');
+      this.tooltip = new Tooltip(this.quill);
+    });
+
+    it('converts youtube video url to embedded', function () {
+      insertVideo(this.tooltip, 'http://youtube.com/watch?v=QHH3iSeDBLo');
+      expect(this.container.querySelector('.ql-video').src).toContain('http://www.youtube.com/embed/QHH3iSeDBLo');
+    });
+
+    it('converts www.youtube video url to embedded', function () {
+      insertVideo(this.tooltip, 'http://www.youtube.com/watch?v=QHH3iSeDBLo');
+      expect(this.container.querySelector('.ql-video').src).toContain('http://www.youtube.com/embed/QHH3iSeDBLo');
+    });
+
+    it('converts m.youtube video url to embedded', function () {
+      insertVideo(this.tooltip, 'http://m.youtube.com/watch?v=QHH3iSeDBLo');
+      expect(this.container.querySelector('.ql-video').src).toContain('http://www.youtube.com/embed/QHH3iSeDBLo');
+    });
+
+    it('preserves youtube video url protocol', function () {
+      insertVideo(this.tooltip, 'https://m.youtube.com/watch?v=QHH3iSeDBLo');
+      expect(this.container.querySelector('.ql-video').src).toContain('https://www.youtube.com/embed/QHH3iSeDBLo');
+    });
+
+    it('uses https as default youtube video url protocol', function () {
+      insertVideo(this.tooltip, 'youtube.com/watch?v=QHH3iSeDBLo');
+      expect(this.container.querySelector('.ql-video').src).toContain('https://www.youtube.com/embed/QHH3iSeDBLo');
+    });
+
+    it('converts vimeo video url to embedded', function () {
+      insertVideo(this.tooltip, 'http://vimeo.com/47762693');
+      expect(this.container.querySelector('.ql-video').src).toContain('http://player.vimeo.com/video/47762693/');
+    });
+
+    it('converts www.vimeo video url to embedded', function () {
+      insertVideo(this.tooltip, 'http://www.vimeo.com/47762693');
+      expect(this.container.querySelector('.ql-video').src).toContain('http://player.vimeo.com/video/47762693/');
+    });
+
+    it('preserves vimeo video url protocol', function () {
+      insertVideo(this.tooltip, 'https://www.vimeo.com/47762693');
+      expect(this.container.querySelector('.ql-video').src).toContain('https://player.vimeo.com/video/47762693/');
+    });
+
+    it('uses https as default vimeo video url protocol', function () {
+      insertVideo(this.tooltip, 'vimeo.com/47762693');
+      expect(this.container.querySelector('.ql-video').src).toContain('https://player.vimeo.com/video/47762693/');
+    });
+
+    function insertVideo(tooltip, url) {
+      tooltip.textbox.value = url;
+      tooltip.root.setAttribute('data-mode', 'video');
+      tooltip.save();
+    }
+  });
+});
 
 /***/ })
 /******/ ])["default"];

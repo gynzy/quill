@@ -13,6 +13,6 @@ class FontStyleAttributor extends Parchment.Attributor.Style {
   }
 }
 
-let FontStyle = new FontStyleAttributor('font', 'font-family', config);
+let FontStyle = new FontStyleAttributor('font-<alt>', 'font-family', config);
 
 export { FontStyle, FontClass };

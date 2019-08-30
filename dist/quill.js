@@ -1,5 +1,5 @@
 /*!
- * Quill Editor v1.3.6
+ * Quill Editor v1.3.7
  * https://quilljs.com/
  * Copyright (c) 2014, Jason Chen
  * Copyright (c) 2013, salesforce.com
@@ -1600,7 +1600,7 @@ Quill.DEFAULTS = {
 Quill.events = _emitter4.default.events;
 Quill.sources = _emitter4.default.sources;
 // eslint-disable-next-line no-undef
-Quill.version =  false ? 'dev' : "1.3.6";
+Quill.version =  false ? 'dev' : "1.3.7";
 
 Quill.imports = {
   'delta': _quillDelta2.default,
@@ -2221,9 +2221,10 @@ var Attributor = /** @class */ (function () {
     Attributor.prototype.remove = function (node) {
         node.removeAttribute(this.keyName);
     };
-    Attributor.prototype.value = function (node) {
+    Attributor.prototype.value = function (node, forced) {
+        if (forced === void 0) { forced = false; }
         var value = node.getAttribute(this.keyName);
-        if (this.canAdd(node, value) && value) {
+        if ((this.canAdd(node, value) || forced) && value) {
             return value;
         }
         return '';
@@ -3695,7 +3696,11 @@ var FormatBlot = /** @class */ (function (_super) {
         if (mutations.some(function (mutation) {
             return mutation.target === _this.domNode && mutation.type === 'attributes';
         })) {
-            this.attributes.build();
+            var incorrectScoped = this.attributes.build();
+            incorrectScoped.forEach(function (_a) {
+                var key = _a.key, value = _a.value;
+                return key && _this.formatAt(0, _this.length(), key, value);
+            });
         }
     };
     FormatBlot.prototype.wrap = function (name, value) {
@@ -5311,8 +5316,8 @@ var ColorAttributor = function (_Parchment$Attributor) {
 
   _createClass(ColorAttributor, [{
     key: 'value',
-    value: function value(domNode) {
-      var value = _get(ColorAttributor.prototype.__proto__ || Object.getPrototypeOf(ColorAttributor.prototype), 'value', this).call(this, domNode);
+    value: function value(domNode, force) {
+      var value = _get(ColorAttributor.prototype.__proto__ || Object.getPrototypeOf(ColorAttributor.prototype), 'value', this).call(this, domNode, force);
       if (!value.startsWith('rgb(')) return value;
       value = value.replace(/^[^\d]+/, '').replace(/[^\d]+$/, '');
       return '#' + value.split(',').map(function (component) {
@@ -5946,15 +5951,41 @@ var AttributorStore = /** @class */ (function () {
         var attributes = attributor_1.default.keys(this.domNode);
         var classes = class_1.default.keys(this.domNode);
         var styles = style_1.default.keys(this.domNode);
+        var incorrectScoped = [];
         attributes
             .concat(classes)
             .concat(styles)
             .forEach(function (name) {
             var attr = Registry.query(name, Registry.Scope.ATTRIBUTE);
-            if (attr instanceof attributor_1.default) {
+            if (attr !== null && attr instanceof attributor_1.default) {
+                var origFormatNames = typeof attr.attrName === 'string' && attr.attrName.split('-<alt>');
+                if (origFormatNames && origFormatNames.length > 1) {
+                    origFormatNames[0].split('-').forEach(function (name, i, arr) {
+                        var value = attr.value(_this.domNode, true);
+                        if (i === arr.length - 1)
+                            attr.remove(_this.domNode);
+                        var level = Registry.query(name, Registry.Scope.ATTRIBUTE);
+                        if (level !== null) {
+                            var key = level.keyName;
+                            value = attr.classList && attr.classList[value] || value;
+                            return incorrectScoped.push({ key: key, value: value });
+                        }
+                        level = Registry.query(name, Registry.Scope.BLOT);
+                        if (level) {
+                            var key = level.blotName;
+                            return incorrectScoped.push({ key: key, value: value });
+                        }
+                    });
+                }
+                if (attr.value(_this.domNode) === '') {
+                    var value = attr.value(_this.domNode, true);
+                    attr.remove(_this.domNode);
+                    return incorrectScoped.push({ key: attr.keyName, value: value });
+                }
                 _this.attributes[attr.attrName] = attr;
             }
         });
+        return incorrectScoped;
     };
     AttributorStore.prototype.copy = function (target) {
         var _this = this;
@@ -6099,10 +6130,11 @@ var StyleAttributor = /** @class */ (function (_super) {
             node.removeAttribute('style');
         }
     };
-    StyleAttributor.prototype.value = function (node) {
+    StyleAttributor.prototype.value = function (node, forced) {
+        if (forced === void 0) { forced = false; }
         // @ts-ignore
         var value = node.style[camelize(this.keyName)];
-        return this.canAdd(node, value) ? value : '';
+        return (this.canAdd(node, value) || forced) ? value : '';
     };
     return StyleAttributor;
 }(attributor_1.default));
@@ -6424,15 +6456,15 @@ var FontStyleAttributor = function (_Parchment$Attributor) {
 
   _createClass(FontStyleAttributor, [{
     key: 'value',
-    value: function value(node) {
-      return _get(FontStyleAttributor.prototype.__proto__ || Object.getPrototypeOf(FontStyleAttributor.prototype), 'value', this).call(this, node).replace(/["']/g, '');
+    value: function value(node, force) {
+      return _get(FontStyleAttributor.prototype.__proto__ || Object.getPrototypeOf(FontStyleAttributor.prototype), 'value', this).call(this, node, force).replace(/["']/g, '');
     }
   }]);
 
   return FontStyleAttributor;
 }(_parchment2.default.Attributor.Style);
 
-var FontStyle = new FontStyleAttributor('font', 'font-family', config);
+var FontStyle = new FontStyleAttributor('font-<alt>', 'font-family', config);
 
 exports.FontStyle = FontStyle;
 exports.FontClass = FontClass;
@@ -9291,6 +9323,7 @@ exports.matchText = matchText;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.BoldStyle = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -9299,6 +9332,10 @@ var _get = function get(object, property, receiver) { if (object === null) objec
 var _inline = __webpack_require__(6);
 
 var _inline2 = _interopRequireDefault(_inline);
+
+var _parchment = __webpack_require__(0);
+
+var _parchment2 = _interopRequireDefault(_parchment);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -9346,6 +9383,7 @@ Bold.tagName = ['STRONG', 'B'];
 Bold.defaultChild = 'break';
 
 exports.default = Bold;
+var BoldStyle = exports.BoldStyle = new _parchment2.default.Attributor.Style('bold-<alt>', 'font-weight', { scope: _parchment2.default.Scope.INLINE });
 
 /***/ }),
 /* 57 */
@@ -10219,12 +10257,15 @@ _core2.default.register({
   'formats/list': _list2.default,
 
   'formats/bold': _bold2.default,
+  'formats/boldStyle': _bold.BoldStyle,
   'formats/code': _code.Code,
   'formats/italic': _italic2.default,
+  'formats/italicStyle': _italic.ItalicStyle,
   'formats/link': _link2.default,
   'formats/script': _script2.default,
   'formats/strike': _strike2.default,
   'formats/underline': _underline2.default,
+  'formats/underlineStrikeStyle': _underline.UnderlineStrikeStyle,
 
   'formats/image': _image2.default,
   'formats/video': _video2.default,
@@ -10305,8 +10346,8 @@ var IdentAttributor = function (_Parchment$Attributor) {
     }
   }, {
     key: 'value',
-    value: function value(node) {
-      return parseInt(_get(IdentAttributor.prototype.__proto__ || Object.getPrototypeOf(IdentAttributor.prototype), 'value', this).call(this, node)) || undefined; // Don't return NaN
+    value: function value(node, force) {
+      return parseInt(_get(IdentAttributor.prototype.__proto__ || Object.getPrototypeOf(IdentAttributor.prototype), 'value', this).call(this, node, force)) || undefined; // Don't return NaN
     }
   }]);
 
@@ -10616,6 +10657,11 @@ exports.default = List;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.ItalicStyle = undefined;
+
+var _parchment = __webpack_require__(0);
+
+var _parchment2 = _interopRequireDefault(_parchment);
 
 var _bold = __webpack_require__(56);
 
@@ -10645,6 +10691,7 @@ Italic.blotName = 'italic';
 Italic.tagName = ['EM', 'I'];
 
 exports.default = Italic;
+var ItalicStyle = exports.ItalicStyle = new _parchment2.default.Attributor.Style('italic-<alt>', 'font-style', { scope: _parchment2.default.Scope.INLINE });
 
 /***/ }),
 /* 69 */
@@ -10760,6 +10807,11 @@ exports.default = Strike;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.UnderlineStrikeStyle = undefined;
+
+var _parchment = __webpack_require__(0);
+
+var _parchment2 = _interopRequireDefault(_parchment);
 
 var _inline = __webpack_require__(6);
 
@@ -10789,6 +10841,9 @@ Underline.blotName = 'underline';
 Underline.tagName = 'U';
 
 exports.default = Underline;
+var UnderlineStrikeStyle = exports.UnderlineStrikeStyle = new _parchment2.default.Attributor.Style('underline-strike-<alt>', 'text-decoration-line', {
+  scope: _parchment2.default.Scope.INLINE
+});
 
 /***/ }),
 /* 72 */
