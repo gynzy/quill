@@ -1,5 +1,5 @@
 /*!
- * Quill Editor v1.3.7
+ * Quill Editor v1.3.9
  * https://quilljs.com/
  * Copyright (c) 2014, Jason Chen
  * Copyright (c) 2013, salesforce.com
@@ -985,11 +985,13 @@ var Block = function (_Parchment$Block) {
         var clone = this.clone();
         // add de defaultChild so it can be formatted correctly
         clone.optimize();
-        if (index === 0 && this.length() > 1) {
-          // newline should be inserted before current line if cursor is at start of line && line is not empty
-          this.parent.insertBefore(clone, this);
-          return this;
-        } else {
+        // insert newline before current line if cursor is at start of line, because newline needs to be formatted afterward
+        if (index === 0 /* && this.length() > 1*/) {
+            // newline should be inserted before current line if cursor is at start of line && line is not empty
+            this.parent.insertBefore(clone, this);
+            return this;
+          } else {
+          // formatting of the newline is handled in the keyboard enter handler, formatting in quill.insertText does not work as expected
           this.parent.insertBefore(clone, this.next);
           return clone;
         }
@@ -1600,7 +1602,7 @@ Quill.DEFAULTS = {
 Quill.events = _emitter4.default.events;
 Quill.sources = _emitter4.default.sources;
 // eslint-disable-next-line no-undef
-Quill.version =  false ? 'dev' : "1.3.7";
+Quill.version =  false ? 'dev' : "1.3.9";
 
 Quill.imports = {
   'delta': _quillDelta2.default,
@@ -1848,8 +1850,6 @@ Inline.allowedChildren = [Inline, _parchment2.default.Embed, _text2.default];
 Inline.order = ['cursor', 'inline', // Must be lower
 'underline', 'strike', 'italic', 'bold', 'script', 'link', 'code' // Must be higher
 ];
-// in order to preserve inlined format blots a default child blot needs to inserted if the blot becomes empty
-Inline.defaultChild = 'break';
 
 exports.default = Inline;
 
@@ -5637,6 +5637,8 @@ var AttributorStore = /** @class */ (function () {
             .forEach(function (name) {
             var attr = Registry.query(name, Registry.Scope.ATTRIBUTE);
             if (attr !== null && attr instanceof attributor_1.default) {
+                // begin: custom step during building the attributor store
+                // attributes added by browser(webkit) but not supported by quill's own formatting need to be translated
                 var origFormatNames = typeof attr.attrName === 'string' && attr.attrName.split('-<alt>');
                 if (origFormatNames && origFormatNames.length > 1) {
                     origFormatNames[0].split('-').forEach(function (name, i, arr) {
@@ -5656,11 +5658,13 @@ var AttributorStore = /** @class */ (function () {
                         }
                     });
                 }
+                // attributes that are incorrectly scoped need to be re-applied
                 if (attr.value(_this.domNode) === '') {
                     var value = attr.value(_this.domNode, true);
                     attr.remove(_this.domNode);
                     return incorrectScoped.push({ key: attr.keyName, value: value });
                 }
+                // end
                 _this.attributes[attr.attrName] = attr;
             }
         });

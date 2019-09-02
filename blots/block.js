@@ -155,11 +155,13 @@ class Block extends Parchment.Block {
       let clone = this.clone();
       // add de defaultChild so it can be formatted correctly
       clone.optimize();
-      if (index === 0 && this.length() > 1) {
+      // insert newline before current line if cursor is at start of line, because newline needs to be formatted afterward
+      if (index === 0/* && this.length() > 1*/) {
         // newline should be inserted before current line if cursor is at start of line && line is not empty
         this.parent.insertBefore(clone, this);
         return this;
       } else {
+        // formatting of the newline is handled in the keyboard enter handler, formatting in quill.insertText does not work as expected
         this.parent.insertBefore(clone, this.next);
         return clone;
       }

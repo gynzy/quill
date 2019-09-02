@@ -4320,9 +4320,9 @@ param-case@2.1.x:
   dependencies:
     no-case "^2.2.0"
 
-"parchment@https://github.com/tony2n2/parchment.git#258ca1909edbd4b42f00798fdc059a098fe89338":
-  version "1.1.4"
-  resolved "https://github.com/tony2n2/parchment.git#258ca1909edbd4b42f00798fdc059a098fe89338"
+"parchment@https://github.com/tony2n2/parchment.git#1.1.5":
+  version "1.1.5"
+  resolved "https://github.com/tony2n2/parchment.git#245c57e17a4c75ce6c29c0966d449ba025acae24"
 
 parse-asn1@^5.0.0:
   version "5.1.1"

@@ -45,8 +45,6 @@ Inline.order = [
   'underline', 'strike', 'italic', 'bold', 'script',
   'link', 'code'        // Must be higher
 ];
-// in order to preserve inlined format blots a default child blot needs to inserted if the blot becomes empty
-Inline.defaultChild = 'break';
 
 
 export default Inline;
