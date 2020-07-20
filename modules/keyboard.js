@@ -275,6 +275,14 @@ Keyboard.DEFAULTS = {
         this.quill.updateContents(delta, Quill.sources.USER);
         this.quill.history.cutoff();
         this.quill.setSelection(range.index - length, Quill.sources.SILENT);
+
+        // Gynzy
+        // BB-514: Restore formatting.
+        const formatKeys = Object.keys(context.format);
+        for (let i = 0; i < formatKeys.length; i++) {
+          let key = formatKeys[i];
+          this.quill.format(key, context.format[key]);
+        }
       }
     },
     'code exit': {
