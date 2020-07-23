@@ -880,7 +880,32 @@ var Block = function (_Parchment$Block) {
         var des = this.descendants(_parchment2.default.Leaf);
         if (des.length === 1 && (des[0].domNode.nodeName === 'BR' || des[0].statics.blotName === 'cursor')) {
           // special case for retrieving format of an empty line
-          this.cache.delta = this.cache.delta.insert('\n', bubbleFormats(des[0]));
+
+          // Gynzy
+          // BB-514: Ensure attributes are generated for restoring lists.
+          // Previously the number (or bullet) for the last line of a list
+          // was lost when saving and restoring the text. The only case where
+          // this did work was when the line did not have any formatting at all.
+          var attributes = bubbleFormats(des[0]);
+          if (this.domNode.nodeName === 'LI') {
+            switch (this.parent.domNode.nodeName) {
+              case 'OL':
+                attributes.list = 'ordered';
+                break;
+              case 'UL':
+                attributes.list = 'bullet';
+                break;
+              default:
+                break;
+            }
+          }
+
+          var indent = this.formats().indent;
+          if (typeof indent === 'number') {
+            attributes.indent = indent;
+          }
+
+          this.cache.delta = this.cache.delta.insert('\n', attributes);
         } else {
           this.cache.delta = this.cache.delta.insert('\n', bubbleFormats(this));
         }
@@ -4811,7 +4836,8 @@ Keyboard.DEFAULTS = {
         this.quill.setSelection(range.index - length, _quill2.default.sources.SILENT);
 
         // Gynzy
-        // BB-514: Restore formatting.
+        // BB-514: Restore formatting. Previously all formatting was lost as
+        // soon as this binding was triggered.
         var formatKeys = Object.keys(context.format);
         for (var i = 0; i < formatKeys.length; i++) {
           var key = formatKeys[i];

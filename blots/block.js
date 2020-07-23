@@ -62,7 +62,32 @@ class Block extends Parchment.Block {
       var des = this.descendants(Parchment.Leaf);
       if (des.length === 1 && (des[0].domNode.nodeName === 'BR' || des[0].statics.blotName === 'cursor')) {
         // special case for retrieving format of an empty line
-        this.cache.delta = this.cache.delta.insert('\n', bubbleFormats(des[0]));
+
+        // Gynzy
+        // BB-514: Ensure attributes are generated for restoring lists.
+        // Previously the number (or bullet) for the last line of a list
+        // was lost when saving and restoring the text. The only case where
+        // this did work was when the line did not have any formatting at all.
+        const attributes = bubbleFormats(des[0]);
+        if (this.domNode.nodeName === 'LI') {
+          switch (this.parent.domNode.nodeName) {
+            case 'OL':
+              attributes.list = 'ordered';
+            break;
+            case 'UL':
+              attributes.list = 'bullet';
+              break;
+            default:
+              break;
+          }
+        }
+
+        const indent = this.formats().indent;
+        if (typeof indent === 'number') {
+          attributes.indent = indent;
+        }
+
+        this.cache.delta = this.cache.delta.insert('\n', attributes);
       } else {
         this.cache.delta = this.cache.delta.insert('\n', bubbleFormats(this));
       }

@@ -277,7 +277,8 @@ Keyboard.DEFAULTS = {
         this.quill.setSelection(range.index - length, Quill.sources.SILENT);
 
         // Gynzy
-        // BB-514: Restore formatting.
+        // BB-514: Restore formatting. Previously all formatting was lost as
+        // soon as this binding was triggered.
         const formatKeys = Object.keys(context.format);
         for (let i = 0; i < formatKeys.length; i++) {
           let key = formatKeys[i];
