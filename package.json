@@ -76,7 +76,7 @@
     "url": "https://github.com/gynzy/quill"
   },
   "bugs": {
-    "url": "https://github.com/quilljs/quill/issues"
+    "url": "https://github.com/gynzy/quill/issues"
   },
   "scripts": {
     "build": "webpack --config _develop/webpack.config.js; rm dist/quill.core dist/quill.bubble dist/quill.snow;",
